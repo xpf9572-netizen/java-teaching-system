@@ -73,7 +73,7 @@ public class AttendanceController extends ToolController {
     private void loadStudentAndCourseData() {
         try {
             HttpRequest studentReq = HttpRequest.newBuilder()
-                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/students/all"))
+                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/student/all"))
                     .GET()
                     .header("Authorization", "Bearer " + com.teach.javafx.AppStore.getJwt().getToken())
                     .build();
@@ -89,7 +89,7 @@ public class AttendanceController extends ToolController {
             }
 
             HttpRequest courseReq = HttpRequest.newBuilder()
-                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/courses/all"))
+                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/course/all"))
                     .GET()
                     .header("Authorization", "Bearer " + com.teach.javafx.AppStore.getJwt().getToken())
                     .build();
@@ -100,7 +100,7 @@ public class AttendanceController extends ToolController {
                 courseList = courseApiResp.getData();
                 courseComboBox.getItems().clear();
                 for (Course c : courseList) {
-                    courseComboBox.getItems().add(new OptionItem(c.getId().intValue(), c.getId().toString(), c.getCourseName()));
+                    courseComboBox.getItems().add(new OptionItem(c.getId().intValue(), c.getId().toString(), c.getName()));
                 }
             }
         } catch (Exception e) {

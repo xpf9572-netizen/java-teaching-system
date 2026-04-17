@@ -261,8 +261,24 @@ public class StudentController extends ToolController {
      */
     @FXML
     protected void onSaveButtonClick() {
-        if (numField.getText().isEmpty()) {
-            MessageDialog.showDialog("学号为空，不能修改");
+        if (numField.getText() == null || numField.getText().isEmpty()) {
+            MessageDialog.showDialog("学号不能为空");
+            return;
+        }
+        if (nameField.getText() == null || nameField.getText().isEmpty()) {
+            MessageDialog.showDialog("姓名不能为空");
+            return;
+        }
+        // 邮箱格式验证
+        String email = emailField.getText();
+        if (email != null && !email.isEmpty() && !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            MessageDialog.showDialog("请输入有效的邮箱地址");
+            return;
+        }
+        // 身份证格式验证（18位）
+        String card = cardField.getText();
+        if (card != null && !card.isEmpty() && !card.matches("^\\d{17}[\\dXx]$")) {
+            MessageDialog.showDialog("请输入有效的身份证号码（18位）");
             return;
         }
         Map<String,Object> form = new HashMap<>();

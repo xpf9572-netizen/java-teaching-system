@@ -45,6 +45,8 @@ public class MainFrameController {
     protected TabPane contentTabPane;
     @FXML
     private Label systemPrompt;
+    @FXML
+    private Label userInfoLabel;
 
     private ChangePanelHandler handler= null;
 
@@ -171,6 +173,14 @@ public class MainFrameController {
         res = HttpRequestUtil.request("/api/base/getDataBaseUserName",req);
         String userName = (String)res.getData();
         systemPrompt.setText("服务器：" + HttpRequestUtil.serverUrl + " 数据库：" + userName);
+
+        // 显示当前用户信息
+        var jwt = AppStore.getJwt();
+        if(jwt != null) {
+            String roleName = "ADMIN".equals(jwt.getRole()) ? "管理员" : "TEACHER".equals(jwt.getRole()) ? "教师" : "学生";
+            userInfoLabel.setText("用户：" + jwt.getUsername() + " (" + roleName + ")");
+        }
+
         res = HttpRequestUtil.request("/api/base/getMenuList",req);
         List<Map> mList = (List<Map>)res.getData();
         initMenuBar(mList);
@@ -191,6 +201,9 @@ public class MainFrameController {
     }
 
     protected void logout(){
+        // 清除JWT token
+        AppStore.setJwt(null);
+
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("base/login-view.fxml"));
         try {
             Scene scene = new Scene(fxmlLoader.load(), 320, 240);
@@ -222,6 +235,13 @@ public class MainFrameController {
     public  void changeContent(String name, String title) {
         if(name == null || name.length() == 0)
             return;
+
+        // 检查是否是退出菜单
+        if("logout".equals(name)) {
+            logout();
+            return;
+        }
+
         Tab tab = tabMap.get(name);
         Scene scene;
         Object c;

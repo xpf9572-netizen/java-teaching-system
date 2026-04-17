@@ -47,7 +47,7 @@ public class LoginController {
     }
     @FXML
     protected void onTeacherLoginButtonClick() {
-        onLoginButtonClick("200799013517","123456");
+        onLoginButtonClick("teacher001","123456");
     }
     protected void onLoginButtonClick(String username, String password) {
         LoginRequest loginRequest = new LoginRequest(username,password);

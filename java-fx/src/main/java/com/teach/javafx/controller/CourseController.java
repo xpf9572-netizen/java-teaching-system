@@ -82,14 +82,41 @@ public class CourseController {
             return;
         int j = Integer.parseInt(name.substring(4));
         Map<String,Object> data = courseList.get(j);
-        System.out.println(data);
+        DataRequest req = new DataRequest();
+        if(data.get("courseId") != null) {
+            req.add("courseId", data.get("courseId"));
+        }
+        req.add("num", data.get("num"));
+        req.add("name", data.get("name"));
+        req.add("credit", data.get("credit"));
+        req.add("coursePath", data.get("coursePath"));
+        if(data.get("preCourseId") != null) {
+            req.add("preCourseId", data.get("preCourseId"));
+        }
+        DataResponse res = HttpRequestUtil.request("/api/course/courseSave", req);
+        if(res != null && res.getCode() == 0) {
+            System.out.println("保存成功");
+            onQueryButtonClick();
+        } else {
+            System.out.println("保存失败: " + (res != null ? res.getMsg() : "未知错误"));
+        }
     }
     public void deleteItem(String name){
         if(name == null)
             return;
-        int j = Integer.parseInt(name.substring(5));
+        int j = Integer.parseInt(name.substring(6));
         Map<String,Object> data = courseList.get(j);
-        System.out.println(data);
+        DataRequest req = new DataRequest();
+        if(data.get("courseId") != null) {
+            req.add("courseId", data.get("courseId"));
+        }
+        DataResponse res = HttpRequestUtil.request("/api/course/courseDelete", req);
+        if(res != null && res.getCode() == 0) {
+            System.out.println("删除成功");
+            onQueryButtonClick();
+        } else {
+            System.out.println("删除失败: " + (res != null ? res.getMsg() : "未知错误"));
+        }
     }
 
     @FXML

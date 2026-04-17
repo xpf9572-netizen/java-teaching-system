@@ -11,9 +11,11 @@ import com.teach.javafx.request.ApiResponse;
 import com.teach.javafx.request.HttpRequestUtil;
 import com.teach.javafx.request.OptionItem;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.cell.MapValueFactory;
 
 import java.lang.reflect.Type;
@@ -72,19 +74,24 @@ public class EnrollmentController extends ToolController {
 
         loadStudentAndCourseData();
         onQueryButtonClick();
+
+        // 添加表格选择监听器
+        TableView.TableViewSelectionModel<Map> tsm = dataTableView.getSelectionModel();
+        ObservableList<Integer> list = tsm.getSelectedIndices();
+        list.addListener(this::onTableRowSelect);
     }
 
     private void loadStudentAndCourseData() {
         try {
             HttpRequest studentReq = HttpRequest.newBuilder()
-                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/students/all"))
+                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/student/all"))
                     .GET()
                     .header("Authorization", "Bearer " + com.teach.javafx.AppStore.getJwt().getToken())
                     .build();
             HttpResponse<String> studentResp = client.send(studentReq, HttpResponse.BodyHandlers.ofString());
             Type studentType = new TypeToken<ApiResponse<List<Student>>>(){}.getType();
             ApiResponse<List<Student>> studentApiResp = gson.fromJson(studentResp.body(), studentType);
-            if (studentApiResp.isSuccess()) {
+            if (studentApiResp != null && studentApiResp.isSuccess()) {
                 studentList = studentApiResp.getData();
                 studentComboBox.getItems().clear();
                 for (Student s : studentList) {
@@ -93,18 +100,18 @@ public class EnrollmentController extends ToolController {
             }
 
             HttpRequest courseReq = HttpRequest.newBuilder()
-                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/courses/all"))
+                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/course/all"))
                     .GET()
                     .header("Authorization", "Bearer " + com.teach.javafx.AppStore.getJwt().getToken())
                     .build();
             HttpResponse<String> courseResp = client.send(courseReq, HttpResponse.BodyHandlers.ofString());
             Type courseType = new TypeToken<ApiResponse<List<Course>>>(){}.getType();
             ApiResponse<List<Course>> courseApiResp = gson.fromJson(courseResp.body(), courseType);
-            if (courseApiResp.isSuccess()) {
+            if (courseApiResp != null && courseApiResp.isSuccess()) {
                 courseList = courseApiResp.getData();
                 courseComboBox.getItems().clear();
                 for (Course c : courseList) {
-                    courseComboBox.getItems().add(new OptionItem(c.getId().intValue(), c.getId().toString(), c.getCourseName()));
+                    courseComboBox.getItems().add(new OptionItem(c.getId().intValue(), c.getId().toString(), c.getName()));
                 }
             }
         } catch (Exception e) {
@@ -191,7 +198,17 @@ public class EnrollmentController extends ToolController {
             data.put("studentId", Long.parseLong(studentComboBox.getValue().getValue()));
             data.put("courseId", Long.parseLong(courseComboBox.getValue().getValue()));
             if (!scoreField.getText().isEmpty()) {
-                data.put("score", Double.parseDouble(scoreField.getText()));
+                try {
+                    double score = Double.parseDouble(scoreField.getText());
+                    if (score < 0 || score > 100) {
+                        MessageDialog.showDialog("成绩必须在0-100之间");
+                        return;
+                    }
+                    data.put("score", score);
+                } catch (NumberFormatException e) {
+                    MessageDialog.showDialog("请输入有效的数字");
+                    return;
+                }
             }
             if (semesterComboBox.getValue() != null) {
                 data.put("semester", semesterComboBox.getValue().getValue());
@@ -229,6 +246,68 @@ public class EnrollmentController extends ToolController {
     public void doSave() { onSaveButtonClick(); }
     public void doDelete() { onDeleteButtonClick(); }
     public void doRefresh() { onQueryButtonClick(); }
+
+    public void onTableRowSelect(ListChangeListener.Change<? extends Integer> change) {
+        changeStudentInfo();
+    }
+
+    protected void changeStudentInfo() {
+        Map<String, Object> form = dataTableView.getSelectionModel().getSelectedItem();
+        if (form == null) {
+            clearPanel();
+            return;
+        }
+        currentId = getLong(form, "id");
+        // 填充表单数据
+        Long studentId = getLong(form, "studentId");
+        Long courseId = getLong(form, "courseId");
+        Double score = (Double) form.get("score");
+        String semester = (String) form.get("semester");
+        String status = (String) form.get("status");
+
+        // 设置学生下拉框
+        for (int i = 0; i < studentComboBox.getItems().size(); i++) {
+            OptionItem item = studentComboBox.getItems().get(i);
+            if (item.getValue().equals(String.valueOf(studentId))) {
+                studentComboBox.getSelectionModel().select(i);
+                break;
+            }
+        }
+        // 设置课程下拉框
+        for (int i = 0; i < courseComboBox.getItems().size(); i++) {
+            OptionItem item = courseComboBox.getItems().get(i);
+            if (item.getValue().equals(String.valueOf(courseId))) {
+                courseComboBox.getSelectionModel().select(i);
+                break;
+            }
+        }
+        // 设置成绩
+        if (score != null) {
+            scoreField.setText(String.valueOf(score));
+        } else {
+            scoreField.setText("");
+        }
+        // 设置学期
+        if (semester != null) {
+            for (int i = 0; i < semesterComboBox.getItems().size(); i++) {
+                OptionItem item = semesterComboBox.getItems().get(i);
+                if (item.getValue().equals(semester)) {
+                    semesterComboBox.getSelectionModel().select(i);
+                    break;
+                }
+            }
+        }
+        // 设置状态
+        if (status != null) {
+            for (int i = 0; i < statusComboBox.getItems().size(); i++) {
+                OptionItem item = statusComboBox.getItems().get(i);
+                if (item.getValue().equals(status)) {
+                    statusComboBox.getSelectionModel().select(i);
+                    break;
+                }
+            }
+        }
+    }
 
     private void clearPanel() {
         currentId = null;

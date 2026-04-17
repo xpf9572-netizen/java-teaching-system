@@ -39,6 +39,10 @@ public class Course {
         this.courseName = courseName;
     }
 
+    public String getName() {
+        return courseName;
+    }
+
     public String getDepartment() {
         return department;
     }

@@ -85,4 +85,21 @@ public class CourseService {
         return CommonMethod.getReturnMessageOK();
     }
 
+    public Map<String, Object> getAllCourses() {
+        List<cn.edu.sdu.java.server.models.Course> courses = courseRepository.findAll();
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        for (cn.edu.sdu.java.server.models.Course c : courses) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", c.getCourseId());
+            m.put("num", c.getNum());
+            m.put("name", c.getName());
+            m.put("credit", c.getCredit());
+            dataList.add(m);
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("data", dataList);
+        return result;
+    }
+
 }

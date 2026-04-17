@@ -16,6 +16,12 @@ public class CourseController {
     public CourseController(CourseService courseService) {
         this.courseService = courseService;
     }
+
+    @GetMapping("/all")
+    public java.util.Map<String, Object> getAllCourses() {
+        return courseService.getAllCourses();
+    }
+
     @PostMapping("/getCourseList")
     public DataResponse getCourseList(@Valid @RequestBody DataRequest dataRequest) {
         return courseService.getCourseList(dataRequest);

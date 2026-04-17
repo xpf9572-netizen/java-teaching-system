@@ -9,6 +9,7 @@ import com.teach.javafx.request.ApiResponse;
 import com.teach.javafx.request.HttpRequestUtil;
 import com.teach.javafx.request.OptionItem;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -73,6 +74,11 @@ public class TeacherController extends ToolController {
         );
 
         onQueryButtonClick();
+
+        // 添加表格选择监听器
+        TableView.TableViewSelectionModel<Map<String, Object>> tsm = dataTableView.getSelectionModel();
+        ObservableList<Integer> list = tsm.getSelectedIndices();
+        list.addListener(this::onTableRowSelect);
     }
 
     private void setTableViewData() {
@@ -146,8 +152,18 @@ public class TeacherController extends ToolController {
 
     @FXML
     protected void onSaveButtonClick() {
-        if (teacherNumField.getText().isEmpty() || nameField.getText().isEmpty()) {
-            MessageDialog.showDialog("工号和姓名不能为空");
+        if (teacherNumField.getText() == null || teacherNumField.getText().isEmpty()) {
+            MessageDialog.showDialog("工号不能为空");
+            return;
+        }
+        if (nameField.getText() == null || nameField.getText().isEmpty()) {
+            MessageDialog.showDialog("姓名不能为空");
+            return;
+        }
+        // 邮箱格式验证
+        String email = emailField.getText();
+        if (email != null && !email.isEmpty() && !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            MessageDialog.showDialog("请输入有效的邮箱地址");
             return;
         }
         try {
@@ -192,6 +208,64 @@ public class TeacherController extends ToolController {
     public void doSave() { onSaveButtonClick(); }
     public void doDelete() { onDeleteButtonClick(); }
     public void doRefresh() { onQueryButtonClick(); }
+
+    public void onTableRowSelect(ListChangeListener.Change<? extends Integer> change) {
+        changeTeacherInfo();
+    }
+
+    protected void changeTeacherInfo() {
+        Map<String, Object> form = dataTableView.getSelectionModel().getSelectedItem();
+        if (form == null) {
+            clearPanel();
+            return;
+        }
+        currentId = getLong(form, "id");
+
+        // 填充表单数据
+        String teacherNum = (String) form.get("teacherNum");
+        String name = (String) form.get("name");
+        String gender = (String) form.get("gender");
+        String title = (String) form.get("title");
+        String department = (String) form.get("department");
+        String phone = (String) form.get("phone");
+        String email = (String) form.get("email");
+        String introduce = (String) form.get("introduce");
+        String status = (String) form.get("status");
+
+        teacherNumField.setText(teacherNum != null ? teacherNum : "");
+        nameField.setText(name != null ? name : "");
+        titleField.setText(title != null ? title : "");
+        departmentField.setText(department != null ? department : "");
+        phoneField.setText(phone != null ? phone : "");
+        emailField.setText(email != null ? email : "");
+        introduceArea.setText(introduce != null ? introduce : "");
+
+        // 设置性别下拉框
+        if (gender != null) {
+            for (int i = 0; i < genderComboBox.getItems().size(); i++) {
+                OptionItem item = genderComboBox.getItems().get(i);
+                if (item.getValue().equals(gender)) {
+                    genderComboBox.getSelectionModel().select(i);
+                    break;
+                }
+            }
+        } else {
+            genderComboBox.getSelectionModel().select(-1);
+        }
+
+        // 设置状态下拉框
+        if (status != null) {
+            for (int i = 0; i < statusComboBox.getItems().size(); i++) {
+                OptionItem item = statusComboBox.getItems().get(i);
+                if (item.getValue().equals(status)) {
+                    statusComboBox.getSelectionModel().select(i);
+                    break;
+                }
+            }
+        } else {
+            statusComboBox.getSelectionModel().select(-1);
+        }
+    }
 
     private void clearPanel() {
         currentId = null;

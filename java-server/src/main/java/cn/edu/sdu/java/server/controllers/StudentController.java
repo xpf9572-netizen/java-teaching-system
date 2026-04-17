@@ -38,6 +38,24 @@ public class StudentController {
      */
 
 
+    @GetMapping("/all")
+    public Map<String, Object> getAllStudents() {
+        List<cn.edu.sdu.java.server.models.Student> students = studentService.getStudentListAll();
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        for (cn.edu.sdu.java.server.models.Student s : students) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("personId", s.getPersonId());
+            m.put("num", s.getPerson() != null ? s.getPerson().getNum() : "");
+            m.put("name", s.getPerson() != null ? s.getPerson().getName() : "");
+            m.put("className", s.getClassName());
+            dataList.add(m);
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("data", dataList);
+        return result;
+    }
+
     @PostMapping("/getStudentList")
     @PreAuthorize("hasRole('ADMIN')")
     public DataResponse getStudentList(@Valid @RequestBody DataRequest dataRequest) {

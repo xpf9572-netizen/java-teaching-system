@@ -98,6 +98,10 @@ public class StudentService {
         return CommonMethod.getReturnData(dataList);  //按照测试框架规范会送Map的list
     }
 
+    public List<Student> getStudentListAll() {
+        return studentRepository.findAll();
+    }
+
 
 
     public DataResponse studentDelete(DataRequest dataRequest) {
