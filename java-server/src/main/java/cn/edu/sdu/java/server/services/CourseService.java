@@ -4,6 +4,7 @@ import cn.edu.sdu.java.server.models.Course;
 import cn.edu.sdu.java.server.payload.request.DataRequest;
 import cn.edu.sdu.java.server.payload.response.DataResponse;
 import cn.edu.sdu.java.server.repositorys.CourseRepository;
+import cn.edu.sdu.java.server.repositorys.EnrollmentRepository;
 import cn.edu.sdu.java.server.util.CommonMethod;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -11,8 +12,11 @@ import java.util.*;
 @Service
 public class CourseService {
     private final CourseRepository courseRepository;
-    public CourseService(CourseRepository courseRepository) {
+    private final EnrollmentRepository enrollmentRepository;
+
+    public CourseService(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository) {
         this.courseRepository = courseRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     public DataResponse getCourseList(DataRequest dataRequest) {
@@ -35,6 +39,10 @@ public class CourseService {
                 m.put("preCourse",pc.getName());
                 m.put("preCourseId",pc.getCourseId());
             }
+            // 添加选课人数和学期
+            Long studentCount = enrollmentRepository.countByCourseIdAndSemester(c.getCourseId(), "2024-1");
+            m.put("studentCount", studentCount != null ? studentCount.intValue() : 0);
+            m.put("semester", "2024-1");
             dataList.add(m);
         }
         return CommonMethod.getReturnData(dataList);

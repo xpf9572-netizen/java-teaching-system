@@ -50,7 +50,7 @@ public class WelcomeTeacherController {
 
             DataRequest req = new DataRequest();
             req.add("personId", teacherId);
-            DataResponse res = HttpRequestUtil.request("/api/teachers/" + teacherId, req);
+            DataResponse res = HttpRequestUtil.request("/api/teachers/getTeacherInfo", req);
 
             if (res != null && res.getCode() == 0) {
                 teacherInfo = (Map<String, Object>) res.getData();

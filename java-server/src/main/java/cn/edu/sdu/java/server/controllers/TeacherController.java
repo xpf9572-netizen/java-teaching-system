@@ -26,6 +26,41 @@ public class TeacherController {
     @Autowired
     private PersonRepository personRepository;
 
+    /**
+     * 获取教师信息 - 返回DataResponse格式
+     * 前端调用: POST /api/teachers/getTeacherInfo
+     */
+    @PostMapping("/getTeacherInfo")
+    public DataResponse getTeacherInfo(@RequestBody DataRequest request) {
+        Integer personId = request.getInteger("personId");
+        if (personId == null) {
+            return CommonMethod.getReturnMessageError("教师ID不能为空");
+        }
+
+        Optional<Teacher> op = teacherRepository.findById(personId);
+        if (op.isPresent()) {
+            Teacher t = op.get();
+            Person p = t.getPerson();
+            Map<String, Object> m = new HashMap<>();
+            if (p != null) {
+                m.put("id", t.getPersonId());
+                m.put("teacherNum", p.getNum());
+                m.put("name", p.getName());
+                m.put("gender", p.getGender());
+                m.put("department", p.getDept());
+                m.put("phone", p.getPhone());
+                m.put("email", p.getEmail());
+                m.put("address", p.getAddress());
+                m.put("introduce", p.getIntroduce());
+            }
+            m.put("title", t.getTitle());
+            m.put("degree", t.getDegree());
+            return CommonMethod.getReturnData(m);
+        } else {
+            return CommonMethod.getReturnMessageError("教师不存在");
+        }
+    }
+
     @GetMapping
     public Map<String, Object> getTeachers(
             @RequestParam(defaultValue = "1") int page,

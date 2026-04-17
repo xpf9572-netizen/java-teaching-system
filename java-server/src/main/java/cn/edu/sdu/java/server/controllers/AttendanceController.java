@@ -3,9 +3,12 @@ package cn.edu.sdu.java.server.controllers;
 import cn.edu.sdu.java.server.models.Attendance;
 import cn.edu.sdu.java.server.models.Course;
 import cn.edu.sdu.java.server.models.Student;
+import cn.edu.sdu.java.server.payload.request.DataRequest;
+import cn.edu.sdu.java.server.payload.response.DataResponse;
 import cn.edu.sdu.java.server.repositorys.AttendanceRepository;
 import cn.edu.sdu.java.server.repositorys.CourseRepository;
 import cn.edu.sdu.java.server.repositorys.StudentRepository;
+import cn.edu.sdu.java.server.util.CommonMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +22,7 @@ import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/attendances")
+@RequestMapping("/api/attendance")
 public class AttendanceController {
     @Autowired
     private AttendanceRepository attendanceRepository;
@@ -28,7 +31,95 @@ public class AttendanceController {
     @Autowired
     private CourseRepository courseRepository;
 
-    @GetMapping
+    /**
+     * 获取课程学生的考勤列表
+     * 前端调用: /api/attendance/getAttendanceList
+     */
+    @PostMapping("/getAttendanceList")
+    public DataResponse getAttendanceList(@RequestBody DataRequest request) {
+        Integer courseId = request.getInteger("courseId");
+        String attendanceDate = request.getString("attendanceDate");
+        String semester = request.getString("semester");
+
+        if (courseId == null || courseId == 0) {
+            return CommonMethod.getReturnMessageError("课程ID不能为空");
+        }
+
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        // 获取选了该课程的学生列表
+        List<Student> students = studentRepository.findStudentsByCourseIdAndSemester(courseId, semester != null ? semester : "2024-1");
+
+        for (Student student : students) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("studentId", student.getPersonId());
+            m.put("studentNum", student.getPerson() != null ? student.getPerson().getNum() : "");
+            m.put("studentName", student.getPerson() != null ? student.getPerson().getName() : "");
+            m.put("className", student.getClassName() != null ? student.getClassName() : "");
+
+            // 查找该学生的考勤记录
+            Optional<Attendance> attendanceOp = attendanceRepository.findByStudentAndCourseAndDate(
+                    student.getPersonId(), courseId, attendanceDate);
+            if (attendanceOp.isPresent()) {
+                Attendance a = attendanceOp.get();
+                m.put("status", a.getStatus());
+                m.put("remark", a.getRemark());
+            } else {
+                m.put("status", "PRESENT"); // 默认出勤
+                m.put("remark", "");
+            }
+            dataList.add(m);
+        }
+
+        return CommonMethod.getReturnData(dataList);
+    }
+
+    /**
+     * 保存考勤记录
+     * 前端调用: /api/attendance/saveAttendance
+     */
+    @PostMapping("/saveAttendance")
+    public DataResponse saveAttendance(@RequestBody DataRequest request) {
+        Integer courseId = request.getInteger("courseId");
+        Integer studentId = request.getInteger("studentId");
+        String attendanceDate = request.getString("attendanceDate");
+        String status = request.getString("status");
+        String remark = request.getString("remark");
+
+        if (courseId == null || studentId == null || attendanceDate == null) {
+            return CommonMethod.getReturnMessageError("课程ID、学生ID和考勤日期不能为空");
+        }
+
+        // 查找是否已存在考勤记录
+        Optional<Attendance> existingOp = attendanceRepository.findByStudentAndCourseAndDate(studentId, courseId, attendanceDate);
+        Attendance attendance;
+        if (existingOp.isPresent()) {
+            attendance = existingOp.get();
+        } else {
+            attendance = new Attendance();
+            // 设置学生和课程
+            studentRepository.findById(studentId).ifPresent(attendance::setStudent);
+            courseRepository.findById(courseId).ifPresent(attendance::setCourse);
+            // 设置考勤日期
+            try {
+                java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(attendanceDate);
+                attendance.setAttendanceDate(date);
+            } catch (Exception e) {
+                return CommonMethod.getReturnMessageError("日期格式错误");
+            }
+        }
+
+        attendance.setStatus(status);
+        attendance.setRemark(remark);
+        attendanceRepository.save(attendance);
+
+        return CommonMethod.getReturnMessageOK();
+    }
+
+    // ============ 原有端点保持兼容 ============
+
+    @GetMapping("/all")
     public Map<String, Object> getAttendances(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "100") int size) {

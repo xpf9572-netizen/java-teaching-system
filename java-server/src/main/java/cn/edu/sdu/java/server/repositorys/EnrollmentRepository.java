@@ -12,4 +12,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("from Enrollment where student.personId = ?1 and course.courseId = ?2 and semester = ?3")
     Optional<Enrollment> findByStudentAndCourseAndSemester(Integer studentId, Integer courseId, String semester);
+
+    @Query("select count(e) from Enrollment e where e.course.courseId = ?1 and e.semester = ?2")
+    Long countByCourseIdAndSemester(Integer courseId, String semester);
 }

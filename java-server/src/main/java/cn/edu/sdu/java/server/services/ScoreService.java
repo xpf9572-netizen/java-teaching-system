@@ -76,12 +76,22 @@ public class ScoreService {
         Integer scoreId = dataRequest.getInteger("scoreId");
         Optional<Score> op;
         Score s = null;
-        if(scoreId != null) {
-            op= scoreRepository.findById(scoreId);
-            if(op.isPresent())
+
+        // 如果没有scoreId，尝试查找是否已存在该学生该课程的成绩记录
+        if (scoreId == null) {
+            List<Score> existingScores = scoreRepository.findByStudentCourse(personId, courseId);
+            if (!existingScores.isEmpty()) {
+                s = existingScores.get(0); // 使用已存在的成绩记录
+            }
+        } else {
+            op = scoreRepository.findById(scoreId);
+            if (op.isPresent()) {
                 s = op.get();
+            }
         }
-        if(s == null) {
+
+        // 如果还是没有，创建新的成绩记录
+        if (s == null) {
             s = new Score();
             s.setStudent(studentRepository.findById(personId).get());
             s.setCourse(courseRepository.findById(courseId).get());
