@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.teach.javafx.controller.ExamManageController"
+      prefHeight="600.0" prefWidth="1000.0"
+      stylesheets="@../css/styles.css">
+    <children>
+        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="tool-bar">
+            <padding>
+                <Insets bottom="10" left="10" right="10" top="10"/>
+            </padding>
+            <children>
+                <Label text="学期:"/>
+                <ComboBox fx:id="semesterComboBox" prefWidth="120"/>
+                <Button text="查询" onAction="#onQueryButtonClick" styleClass="button-style"/>
+                <Button text="添加考试" onAction="#onAddButtonClick" styleClass="button-style"/>
+            </children>
+        </HBox>
+
+        <TableView fx:id="dataTableView" prefHeight="500.0" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="courseColumn" text="课程" prefWidth="120"/>
+                <TableColumn fx:id="semesterColumn" text="学期" prefWidth="80"/>
+                <TableColumn fx:id="examDateColumn" text="考试日期" prefWidth="100"/>
+                <TableColumn fx:id="examTimeColumn" text="考试时间" prefWidth="100"/>
+                <TableColumn fx:id="examLocationColumn" text="考试地点" prefWidth="100"/>
+                <TableColumn fx:id="invigilatorColumn" text="监考教师" prefWidth="80"/>
+                <TableColumn fx:id="examTypeColumn" text="考试类型" prefWidth="80"/>
+                <TableColumn fx:id="operateColumn" text="操作" prefWidth="180"/>
+            </columns>
+        </TableView>
+    </children>
+</VBox>

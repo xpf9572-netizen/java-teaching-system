@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.teach.javafx.controller.ImportExportController"
+      prefHeight="400.0" prefWidth="600.0"
+      stylesheets="@../css/styles.css">
+    <children>
+        <VBox spacing="20" styleClass="section-container">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20"/>
+            </padding>
+
+            <Label text="数据导出" styleClass="label-header"/>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="导出类型:"/>
+                <ComboBox fx:id="exportTypeComboBox" prefWidth="150"/>
+                <Label text="课程:"/>
+                <ComboBox fx:id="courseComboBox" prefWidth="150"/>
+                <Button text="导出Excel" onAction="#onExportButtonClick" styleClass="button-style"/>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="20" styleClass="section-container">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20"/>
+            </padding>
+
+            <Label text="数据导入" styleClass="label-header"/>
+
+            <VBox spacing="10">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="学生数据:"/>
+                    <Button text="导入学生Excel" onAction="#onImportStudentButtonClick" styleClass="button-style"/>
+                    <Label text="格式: 学号,姓名,性别,班级,专业,学院,出生日期,电话,地址,邮箱"/>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="成绩数据:"/>
+                    <Button text="导入成绩Excel" onAction="#onImportScoreButtonClick" styleClass="button-style"/>
+                    <Label text="格式: 学号,课程编号,成绩"/>
+                </HBox>
+            </VBox>
+
+            <Label text="说明: 导入文件需为Excel格式(.xlsx或.xls)，请确保数据格式正确。"/>
+        </VBox>
+    </children>
+</VBox>
