@@ -91,6 +91,9 @@ public class TeacherCourseController {
     @FXML
     protected void onRefreshButtonClick() {
         loadCourseData();
-        MessageDialog.showDialog("刷新成功");
+    }
+
+    public void doRefresh() {
+        loadCourseData();
     }
 }

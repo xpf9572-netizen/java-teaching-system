@@ -50,7 +50,7 @@ public class ScoreService {
         Integer courseId = dataRequest.getInteger("courseId");
         if(courseId == null)
             courseId = 0;
-        List<Score> sList = scoreRepository.findByStudentCourse(personId, courseId);  //数据库查询操作
+        List<Score> sList = scoreRepository.findByStudentCourseWithFetch(personId, courseId);  //JOIN FETCH查询，避免N+1
         List<Map<String,Object>> dataList = new ArrayList<>();
         Map<String,Object> m;
         for (Score s : sList) {
@@ -77,6 +77,13 @@ public class ScoreService {
         Optional<Score> op;
         Score s = null;
 
+        // Authorization check: 由于course表没有teacher_id字段，暂时跳过授权检查
+        // TODO: 添加teacher_id到course表或创建teacher_course关联表
+        Integer teacherId = CommonMethod.getPersonId();
+        if (teacherId == null) {
+            return CommonMethod.getReturnMessageError("用户未登录");
+        }
+
         // 如果没有scoreId，尝试查找是否已存在该学生该课程的成绩记录
         if (scoreId == null) {
             List<Score> existingScores = scoreRepository.findByStudentCourse(personId, courseId);
@@ -93,8 +100,10 @@ public class ScoreService {
         // 如果还是没有，创建新的成绩记录
         if (s == null) {
             s = new Score();
-            s.setStudent(studentRepository.findById(personId).get());
-            s.setCourse(courseRepository.findById(courseId).get());
+            s.setStudent(studentRepository.findById(personId)
+                        .orElseThrow(() -> new RuntimeException("学生不存在: personId=" + personId)));
+            s.setCourse(courseRepository.findById(courseId)
+                        .orElseThrow(() -> new RuntimeException("课程不存在: courseId=" + courseId)));
         }
         s.setMark(mark);
         scoreRepository.save(s);
@@ -108,6 +117,11 @@ public class ScoreService {
             op= scoreRepository.findById(scoreId);
             if(op.isPresent()) {
                 s = op.get();
+                // Authorization check: 由于course表没有teacher_id字段，暂时跳过授权检查
+                Integer teacherId = CommonMethod.getPersonId();
+                if (teacherId == null) {
+                    return CommonMethod.getReturnMessageError("用户未登录");
+                }
                 scoreRepository.delete(s);
             }
         }

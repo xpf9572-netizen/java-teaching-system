@@ -5,6 +5,7 @@ import cn.edu.sdu.java.server.payload.response.DataResponse;
 import cn.edu.sdu.java.server.payload.response.OptionItemList;
 import cn.edu.sdu.java.server.services.ScoreService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -31,10 +32,12 @@ public class ScoreController {
         return scoreService.getScoreList(dataRequest);
     }
     @PostMapping("/scoreSave")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     public DataResponse scoreSave(@Valid @RequestBody DataRequest dataRequest) {
         return scoreService.scoreSave(dataRequest);
     }
     @PostMapping("/scoreDelete")
+    @PreAuthorize("hasRole('ADMIN')")
     public DataResponse scoreDelete(@Valid @RequestBody DataRequest dataRequest) {
         return scoreService.scoreDelete(dataRequest);
     }

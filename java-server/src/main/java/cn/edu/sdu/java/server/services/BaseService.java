@@ -21,6 +21,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -158,7 +159,9 @@ public class BaseService {
             Integer personId = CommonMethod.getPersonId();
             if (personId == null)
                 return CommonMethod.getReturnData(dataList);
-            userTypeId = userRepository.findById(personId).get().getUserType().getId();
+            userTypeId = userRepository.findByPersonPersonId(personId)
+                    .orElseThrow(() -> new RuntimeException("用户不存在，personId=" + personId))
+                    .getUserType().getId();
         }
         List<MenuInfo> mList = menuInfoRepository.findByUserTypeIds(userTypeId + "");
         Map<String, Object> m;
@@ -303,6 +306,12 @@ public class BaseService {
 
     public DataResponse uploadPhoto(byte[] barr,String remoteFile) {
         try {
+            // Validate remoteFile to prevent path traversal attacks
+            if (remoteFile == null || remoteFile.isEmpty() ||
+                remoteFile.contains("..") || remoteFile.startsWith("/") || remoteFile.startsWith("\\") ||
+                remoteFile.contains(":")) {
+                return CommonMethod.getReturnMessageError("无效的文件路径");
+            }
             OutputStream os = new FileOutputStream(new File(attachFolder + remoteFile));
             os.write(barr);
             os.close();
@@ -351,6 +360,7 @@ public class BaseService {
         }
     }
 
+    @Transactional
     public DataResponse updatePassword(DataRequest dataRequest) {
         String oldPassword = dataRequest.getString("oldPassword");  //获取oldPassword
         String newPassword = dataRequest.getString("newPassword");  //获取newPassword

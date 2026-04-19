@@ -40,8 +40,10 @@ public class StudentStatisticsController {
      */
     private void setTableViewData() {
         observableList.clear();
-        for (Map map : dataList) {
-            observableList.addAll(FXCollections.observableArrayList(map));
+        if (dataList != null) {
+            for (Map map : dataList) {
+                observableList.addAll(FXCollections.observableArrayList(map));
+            }
         }
         dataTableView.setItems(observableList);
     }
@@ -78,5 +80,9 @@ public class StudentStatisticsController {
         if (res != null && res.getCode() == 0) {
             onQueryButtonClick();
         }
+    }
+
+    public void doRefresh() {
+        onQueryButtonClick();
     }
 }

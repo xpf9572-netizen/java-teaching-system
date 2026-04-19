@@ -17,10 +17,13 @@ public interface ScoreRepository extends JpaRepository<Score,Integer> {
     @Query(value="from Score where (?1=0 or student.personId=?1) and (?2=0 or course.courseId=?2)" )
     List<Score> findByStudentCourse(Integer personId, Integer courseId);
 
-    @Query(value="from Score where student.personId=?1 and (?2=0 or course.name like %?2%)" )
+    @Query(value="from Score where student.personId=?1 and (?2=0 or course.name like concat('%', ?2, '%'))" )
     List<Score> findByStudentCourse(Integer personId, String courseName);
 
     @Query(value="select s.student.personId, count(s.scoreId), sum(s.mark),sum(s.course.credit),sum(s.course.credit* s.mark) from Score s where s.student.personId in ?1 group by s.student.personId" )
     List<?> getStudentStatisticsList(List<Integer> personId);
+
+    @Query("SELECT s FROM Score s JOIN FETCH s.student st JOIN FETCH st.person JOIN FETCH s.course c WHERE (?1 = 0 OR st.personId = ?1) AND (?2 = 0 OR c.courseId = ?2)")
+    List<Score> findByStudentCourseWithFetch(Integer personId, Integer courseId);
 
 }

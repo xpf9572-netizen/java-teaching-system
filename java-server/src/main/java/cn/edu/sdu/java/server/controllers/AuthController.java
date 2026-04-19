@@ -5,6 +5,8 @@ import cn.edu.sdu.java.server.payload.request.LoginRequest;
 import cn.edu.sdu.java.server.payload.response.DataResponse;
 import cn.edu.sdu.java.server.services.AuthService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
     public AuthController(AuthService authService) {
         this.authService = authService;
@@ -43,5 +46,11 @@ public class AuthController {
     @PostMapping("/registerUser")
     public DataResponse registerUser(@Valid @RequestBody DataRequest dataRequest) {
         return authService.registerUser(dataRequest);
+    }
+
+    @PostMapping("/logout")
+    public DataResponse logout() {
+        logger.info("User logged out");
+        return new DataResponse(0, null, "Logout successful");
     }
 }

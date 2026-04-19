@@ -1,13 +1,12 @@
 package com.teach.javafx.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.teach.javafx.controller.base.MessageDialog;
 import com.teach.javafx.controller.base.ToolController;
-import com.teach.javafx.models.Teacher;
-import com.teach.javafx.request.ApiResponse;
+import com.teach.javafx.request.DataRequest;
+import com.teach.javafx.request.DataResponse;
 import com.teach.javafx.request.HttpRequestUtil;
 import com.teach.javafx.request.OptionItem;
+import com.teach.javafx.util.CommonMethod;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -15,18 +14,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TeacherController extends ToolController {
-    private final HttpClient client = HttpClient.newHttpClient();
-    private final Gson gson = new Gson();
 
     @FXML private TableView<Map<String, Object>> dataTableView;
     @FXML private TableColumn<Map<String, Object>, String> teacherNumColumn;
@@ -90,24 +82,18 @@ public class TeacherController extends ToolController {
     @FXML
     protected void onQueryButtonClick() {
         try {
-            String url = HttpRequestUtil.serverUrl + "/api/teachers?page=1&size=100";
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
-                    .header("Authorization", "Bearer " + com.teach.javafx.AppStore.getJwt().getToken())
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                Type type = new TypeToken<ApiResponse<ApiResponse.PageData<Teacher>>>(){}.getType();
-                ApiResponse<ApiResponse.PageData<Teacher>> apiResponse = gson.fromJson(response.body(), type);
-                if (apiResponse.isSuccess()) {
-                    teacherList.clear();
-                    for (Teacher t : apiResponse.getData().getContent()) {
-                        teacherList.add(entityToMap(t));
-                    }
-                    setTableViewData();
-                }
+            String numName = "";
+            if (queryTeacherNumField.getText() != null && !queryTeacherNumField.getText().isEmpty()) {
+                numName = queryTeacherNumField.getText();
+            } else if (queryNameField.getText() != null && !queryNameField.getText().isEmpty()) {
+                numName = queryNameField.getText();
+            }
+            DataRequest req = new DataRequest();
+            req.add("numName", numName);
+            DataResponse res = HttpRequestUtil.request("/api/teachers/getTeacherList", req);
+            if (res != null && res.getCode() == 0) {
+                teacherList = (ArrayList<Map<String, Object>>) res.getData();
+                setTableViewData();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,23 +116,20 @@ public class TeacherController extends ToolController {
         }
         if (MessageDialog.choiceDialog("确认要删除吗?") != MessageDialog.CHOICE_YES) return;
 
-        try {
-            Long id = getLong(selected, "id");
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(HttpRequestUtil.serverUrl + "/api/teachers/" + id))
-                    .DELETE()
-                    .header("Authorization", "Bearer " + com.teach.javafx.AppStore.getJwt().getToken())
-                    .build();
-            HttpResponse<String> resp = client.send(request, HttpResponse.BodyHandlers.ofString());
-            ApiResponse<Void> apiResponse = gson.fromJson(resp.body(), ApiResponse.class);
-            if (apiResponse.isSuccess()) {
+        currentId = CommonMethod.getInteger(selected, "personId").longValue();
+        DataRequest req = new DataRequest();
+        req.add("personId", currentId);
+        DataResponse res = HttpRequestUtil.request("/api/teachers/teacherDelete", req);
+        if (res != null) {
+            if (res.getCode() == 0) {
                 MessageDialog.showDialog("删除成功!");
+                currentId = null;
                 onQueryButtonClick();
             } else {
-                MessageDialog.showDialog(apiResponse.getMsg());
+                MessageDialog.showDialog(res.getMsg());
             }
-        } catch (Exception e) {
-            MessageDialog.showDialog("删除失败: " + e.getMessage());
+        } else {
+            MessageDialog.showDialog("删除失败");
         }
     }
 
@@ -166,41 +149,32 @@ public class TeacherController extends ToolController {
             MessageDialog.showDialog("请输入有效的邮箱地址");
             return;
         }
-        try {
-            Map<String, Object> data = new HashMap<>();
-            data.put("teacherNum", teacherNumField.getText());
-            data.put("name", nameField.getText());
-            if (genderComboBox.getValue() != null) data.put("gender", genderComboBox.getValue().getValue());
-            data.put("title", titleField.getText());
-            data.put("department", departmentField.getText());
-            data.put("phone", phoneField.getText());
-            data.put("email", emailField.getText());
-            data.put("introduce", introduceArea.getText());
-            if (statusComboBox.getValue() != null) data.put("status", statusComboBox.getValue().getValue());
 
-            String json = gson.toJson(data);
-            String url = currentId == null ? HttpRequestUtil.serverUrl + "/api/teachers"
-                    : HttpRequestUtil.serverUrl + "/api/teachers/" + currentId;
+        Map<String, Object> form = new HashMap<>();
+        form.put("teacherNum", teacherNumField.getText());
+        form.put("name", nameField.getText());
+        if (genderComboBox.getValue() != null) {
+            form.put("gender", genderComboBox.getValue().getValue());
+        }
+        form.put("title", titleField.getText());
+        form.put("dept", departmentField.getText());
+        form.put("phone", phoneField.getText());
+        form.put("email", emailField.getText());
+        form.put("introduce", introduceArea.getText());
+        if (statusComboBox.getValue() != null) {
+            form.put("status", statusComboBox.getValue().getValue());
+        }
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .method(currentId == null ? "POST" : "PUT", HttpRequest.BodyPublishers.ofString(json))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + com.teach.javafx.AppStore.getJwt().getToken())
-                    .build();
-
-            HttpResponse<String> resp = client.send(request, HttpResponse.BodyHandlers.ofString());
-            Type type = new TypeToken<ApiResponse<Teacher>>(){}.getType();
-            ApiResponse<Teacher> apiResponse = gson.fromJson(resp.body(), type);
-            if (apiResponse.isSuccess()) {
-                MessageDialog.showDialog("保存成功!");
-                currentId = apiResponse.getData().getId();
-                onQueryButtonClick();
-            } else {
-                MessageDialog.showDialog(apiResponse.getMsg());
-            }
-        } catch (Exception e) {
-            MessageDialog.showDialog("保存失败: " + e.getMessage());
+        DataRequest req = new DataRequest();
+        req.add("personId", currentId);
+        req.add("form", form);
+        DataResponse res = HttpRequestUtil.request("/api/teachers/teacherEditSave", req);
+        if (res.getCode() == 0) {
+            currentId = CommonMethod.getIntegerFromObject(res.getData()).longValue();
+            MessageDialog.showDialog("保存成功!");
+            onQueryButtonClick();
+        } else {
+            MessageDialog.showDialog(res.getMsg());
         }
     }
 
@@ -219,29 +193,20 @@ public class TeacherController extends ToolController {
             clearPanel();
             return;
         }
-        currentId = getLong(form, "id");
+        currentId = CommonMethod.getInteger(form, "personId").longValue();
 
         // 填充表单数据
-        String teacherNum = (String) form.get("teacherNum");
-        String name = (String) form.get("name");
-        String gender = (String) form.get("gender");
-        String title = (String) form.get("title");
-        String department = (String) form.get("department");
-        String phone = (String) form.get("phone");
-        String email = (String) form.get("email");
-        String introduce = (String) form.get("introduce");
-        String status = (String) form.get("status");
-
-        teacherNumField.setText(teacherNum != null ? teacherNum : "");
-        nameField.setText(name != null ? name : "");
-        titleField.setText(title != null ? title : "");
-        departmentField.setText(department != null ? department : "");
-        phoneField.setText(phone != null ? phone : "");
-        emailField.setText(email != null ? email : "");
-        introduceArea.setText(introduce != null ? introduce : "");
+        teacherNumField.setText(CommonMethod.getString(form, "teacherNum"));
+        nameField.setText(CommonMethod.getString(form, "name"));
+        titleField.setText(CommonMethod.getString(form, "title"));
+        departmentField.setText(CommonMethod.getString(form, "dept"));
+        phoneField.setText(CommonMethod.getString(form, "phone"));
+        emailField.setText(CommonMethod.getString(form, "email"));
+        introduceArea.setText(CommonMethod.getString(form, "introduce"));
 
         // 设置性别下拉框
-        if (gender != null) {
+        String gender = CommonMethod.getString(form, "gender");
+        if (gender != null && !gender.isEmpty()) {
             for (int i = 0; i < genderComboBox.getItems().size(); i++) {
                 OptionItem item = genderComboBox.getItems().get(i);
                 if (item.getValue().equals(gender)) {
@@ -254,7 +219,8 @@ public class TeacherController extends ToolController {
         }
 
         // 设置状态下拉框
-        if (status != null) {
+        String status = CommonMethod.getString(form, "status");
+        if (status != null && !status.isEmpty()) {
             for (int i = 0; i < statusComboBox.getItems().size(); i++) {
                 OptionItem item = statusComboBox.getItems().get(i);
                 if (item.getValue().equals(status)) {
@@ -269,27 +235,14 @@ public class TeacherController extends ToolController {
 
     private void clearPanel() {
         currentId = null;
-        teacherNumField.setText(""); nameField.setText("");
-        genderComboBox.getSelectionModel().select(-1); titleField.setText("");
-        departmentField.setText(""); phoneField.setText(""); emailField.setText("");
-        introduceArea.setText(""); statusComboBox.getSelectionModel().select(-1);
-    }
-
-    private Map<String, Object> entityToMap(Teacher t) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", t.getId()); map.put("teacherNum", t.getTeacherNum());
-        map.put("name", t.getName()); map.put("gender", t.getGender());
-        map.put("title", t.getTitle()); map.put("department", t.getDepartment());
-        map.put("phone", t.getPhone()); map.put("email", t.getEmail());
-        map.put("introduce", t.getIntroduce()); map.put("status", t.getStatus());
-        return map;
-    }
-
-    private Long getLong(Map<String, Object> map, String key) {
-        Object v = map.get(key);
-        if (v == null) return null;
-        if (v instanceof Long) return (Long) v;
-        if (v instanceof Integer) return ((Integer) v).longValue();
-        return Long.parseLong(v.toString());
+        teacherNumField.setText("");
+        nameField.setText("");
+        genderComboBox.getSelectionModel().select(-1);
+        titleField.setText("");
+        departmentField.setText("");
+        phoneField.setText("");
+        emailField.setText("");
+        introduceArea.setText("");
+        statusComboBox.getSelectionModel().select(-1);
     }
 }

@@ -1,6 +1,7 @@
 package cn.edu.sdu.java.server.repositorys;
 
 import cn.edu.sdu.java.server.models.Enrollment;
+import cn.edu.sdu.java.server.models.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
@@ -15,4 +16,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("select count(e) from Enrollment e where e.course.courseId = ?1 and e.semester = ?2")
     Long countByCourseIdAndSemester(Integer courseId, String semester);
+
+    List<Enrollment> findByStudentPersonId(Integer studentId);
+
+    @Query("select distinct e.course from Enrollment e where e.semester = ?1")
+    List<Course> findCoursesBySemester(String semester);
+
+    @Query("select distinct e.course from Enrollment e where e.student.personId = ?1 and e.semester = ?2")
+    List<Course> findCoursesByStudentIdAndSemester(Integer studentId, String semester);
 }

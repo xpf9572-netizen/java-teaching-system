@@ -93,7 +93,7 @@ public class CourseService {
         return CommonMethod.getReturnMessageOK();
     }
 
-    public Map<String, Object> getAllCourses() {
+    public DataResponse getAllCourses() {
         List<cn.edu.sdu.java.server.models.Course> courses = courseRepository.findAll();
         List<Map<String, Object>> dataList = new ArrayList<>();
         for (cn.edu.sdu.java.server.models.Course c : courses) {
@@ -104,10 +104,47 @@ public class CourseService {
             m.put("credit", c.getCredit());
             dataList.add(m);
         }
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("data", dataList);
-        return result;
+        return CommonMethod.getReturnData(dataList);
+    }
+
+    public DataResponse getCourseListByTeacher(DataRequest dataRequest) {
+        // 通过enrollment表查询有选课记录的课程
+        // 由于course表没有teacher_id字段，通过enrollment表关联：找到有学生选修的课程
+        String semester = dataRequest.getString("semester");
+        if(semester == null || semester.isEmpty())
+            semester = "2024-1";
+        List<Course> cList = enrollmentRepository.findCoursesBySemester(semester);
+        List<Map<String,Object>> dataList = new ArrayList<>();
+        Map<String,Object> m;
+        for (Course c : cList) {
+            m = new HashMap<>();
+            m.put("courseId", c.getCourseId()+"");
+            m.put("num", c.getNum());
+            m.put("name", c.getName());
+            m.put("credit", c.getCredit()+"");
+            if(c.getPreCourse() != null) {
+                m.put("preCourse", c.getPreCourse().getName());
+                m.put("preCourseId", c.getPreCourse().getCourseId());
+            }
+            Long studentCount = enrollmentRepository.countByCourseIdAndSemester(c.getCourseId(), semester);
+            m.put("studentCount", studentCount != null ? studentCount.intValue() : 0);
+            m.put("semester", semester);
+            dataList.add(m);
+        }
+        return CommonMethod.getReturnData(dataList);
+    }
+
+    public DataResponse getCourseOptionList(DataRequest dataRequest) {
+        List<Course> courses = courseRepository.findAll();
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        for (Course c : courses) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", c.getCourseId());
+            m.put("value", c.getCourseId().toString());
+            m.put("title", c.getNum() + " - " + c.getName());
+            dataList.add(m);
+        }
+        return CommonMethod.getReturnData(dataList);
     }
 
 }

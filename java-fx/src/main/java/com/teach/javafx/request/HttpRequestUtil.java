@@ -65,13 +65,18 @@ public class HttpRequestUtil {
      * @return DataResponse 返回后台返回数据
      */
     public static DataResponse request(String url, DataRequest request){
+            JwtResponse jwt = AppStore.getJwt();
+            if(jwt == null || jwt.getToken() == null) {
+                System.out.println("用户未登录或登录已过期");
+                return null;
+            }
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(URI.create(serverUrl + url))
                     .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(request)))
                     .headers("Content-Type", "application/json")
-                    .headers("Authorization", "Bearer " + AppStore.getJwt().getToken())
+                    .headers("Authorization", "Bearer " + jwt.getToken())
                     .build();
-            request.add("username",AppStore.getJwt().getUsername());
+            request.add("username",jwt.getUsername());
             HttpClient client = HttpClient.newHttpClient();
             try {
                 HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());

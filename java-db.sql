@@ -136,7 +136,7 @@ DROP TABLE IF EXISTS `menu`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `menu` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(40) DEFAULT NULL,
   `title` varchar(40) DEFAULT NULL,
   `pid` int DEFAULT NULL,
@@ -151,8 +151,38 @@ CREATE TABLE `menu` (
 
 LOCK TABLES `menu` WRITE;
 /*!40000 ALTER TABLE `menu` DISABLE KEYS */;
-INSERT INTO `menu` VALUES (1,NULL,'个人信息',NULL,'1,2,3'),(2,NULL,'系统管理',NULL,'1'),(3,NULL,'人员管理',NULL,'1'),(4,NULL,'教务管理',NULL,'1'),(5,NULL,'示例程序',NULL,'1'),(11,'system_summary_panel','系统简介',1,'1,2,3'),(12,'base/password-panel','修改密码',1,'1,2,3'),(15,'logout','退出',1,'1,2,3'),(21,'base/menu-panel','菜单管理',2,'1'),(22,'base/dictionary-panel','字典管理',2,'1'),(31,'student-panel','学生管理',3,'1'),(41,'course-panel','课程管理',4,'1'),(42,'score-table-panel','成绩管理',4,'1'),(51,'base/control-demo-panel','组件示例',5,'1');
+INSERT INTO `menu` VALUES (1,NULL,'个人信息',NULL,'1,2,3'),(2,NULL,'系统管理',NULL,'1'),(3,NULL,'人员管理',NULL,'1'),(4,NULL,'教务管理',NULL,'1'),(5,NULL,'示例程序',NULL,'1'),(6,NULL,'教师管理',NULL,'1,3'),(7,NULL,'学生服务',NULL,'2'),(11,'system_summary_panel','系统简介',1,'1,2,3'),(12,'base/password-panel','修改密码',1,'1,2,3'),(15,'logout','退出',1,'1,2,3'),(21,'base/menu-panel','菜单管理',2,'1'),(22,'base/dictionary-panel','字典管理',2,'1'),(31,'student-panel','学生管理',3,'1'),(41,'course-panel','课程管理',4,'1'),(42,'score-table-panel','成绩管理',4,'1'),(51,'base/control-demo-panel','组件示例',5,'1'),(61,'WelcomeTeacherPanel','首页',6,'3'),(62,'TeacherCoursePanel','我的课程',61,'3'),(63,'TeacherAttendancePanel','考勤管理',61,'3'),(64,'TeacherScorePanel','成绩录入',61,'3'),(65,'logout','退出',61,'3'),(71,'WelcomeStudentPanel','首页',7,'2'),(72,'StudentScorePanel','我的成绩',71,'2'),(73,'student-leave-panel','学生请假',71,'2'),(74,'student-achievement-panel','学生成就',71,'2'),(75,'student-enrollment-panel','选课管理',71,'2'),(76,'student-schedule-panel','我的课表',71,'2'),(77,'student-attendance-panel','考勤查询',71,'2'),(78,'notice-panel','通知公告',71,'2'),(79,'logout','退出',71,'2');
 /*!40000 ALTER TABLE `menu` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `notice`
+--
+
+DROP TABLE IF EXISTS `notice`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notice` (
+  `notice_id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `content` varchar(4000) DEFAULT NULL,
+  `publisher` varchar(50) DEFAULT NULL,
+  `publish_time` datetime DEFAULT NULL,
+  `type` varchar(20) DEFAULT NULL,
+  `target_audience` varchar(50) DEFAULT NULL,
+  `version` int DEFAULT 0,
+  PRIMARY KEY (`notice_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notice`
+--
+
+LOCK TABLES `notice` WRITE;
+/*!40000 ALTER TABLE `notice` DISABLE KEYS */;
+INSERT INTO `notice` VALUES (1,'开学通知','请全体师生于3月1日到校报到','管理员','2024-02-28 10:00:00','IMPORTANT','ALL',0),(2,'清明节放假通知','清明节放假3天','教务处','2024-04-01 09:00:00','HOLIDAY','ALL',0);
+/*!40000 ALTER TABLE `notice` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -326,6 +356,71 @@ INSERT INTO `student` VALUES (2,'软件工程','软1'),(3,'软件工程','软2')
 UNLOCK TABLES;
 
 --
+-- Table structure for table `enrollment`
+--
+
+DROP TABLE IF EXISTS `enrollment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `enrollment` (
+  `enrollment_id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int DEFAULT NULL,
+  `course_id` int DEFAULT NULL,
+  `score` double DEFAULT NULL,
+  `semester` varchar(20) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  `version` int DEFAULT 0,
+  PRIMARY KEY (`enrollment_id`),
+  KEY `FK_enrollment_student` (`student_id`),
+  KEY `FK_enrollment_course` (`course_id`),
+  CONSTRAINT `FK_enrollment_student` FOREIGN KEY (`student_id`) REFERENCES `student` (`person_id`),
+  CONSTRAINT `FK_enrollment_course` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `enrollment`
+--
+
+LOCK TABLES `enrollment` WRITE;
+/*!40000 ALTER TABLE `enrollment` DISABLE KEYS */;
+INSERT INTO `enrollment` VALUES (1,2,1,85.5,'2024-1','FINISHED',0),(2,2,2,90.0,'2024-1','FINISHED',0),(3,3,1,78.0,'2024-1','FINISHED',0);
+/*!40000 ALTER TABLE `enrollment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `attendance`
+--
+
+DROP TABLE IF EXISTS `attendance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `attendance` (
+  `attendance_id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int DEFAULT NULL,
+  `course_id` int DEFAULT NULL,
+  `attendance_date` date DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  `remark` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`attendance_id`),
+  KEY `FK_attendance_student` (`student_id`),
+  KEY `FK_attendance_course` (`course_id`),
+  CONSTRAINT `FK_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `student` (`person_id`),
+  CONSTRAINT `FK_attendance_course` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `attendance`
+--
+
+LOCK TABLES `attendance` WRITE;
+/*!40000 ALTER TABLE `attendance` DISABLE KEYS */;
+INSERT INTO `attendance` VALUES (1,2,1,'2024-03-01','PRESENT',NULL),(2,2,1,'2024-03-08','PRESENT',NULL),(3,2,2,'2024-03-01','ABSENT','病假'),(4,3,1,'2024-03-01','PRESENT',NULL);
+/*!40000 ALTER TABLE `attendance` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `student_leave`
 --
 
@@ -344,6 +439,7 @@ CREATE TABLE `student_leave` (
   `teacher_time` datetime(6) DEFAULT NULL,
   `student_id` int DEFAULT NULL,
   `teacher_id` int DEFAULT NULL,
+  `version` int DEFAULT 0,
   PRIMARY KEY (`student_leave_id`),
   KEY `FKjhmm523fqctbt383asjy2b2sb` (`student_id`),
   KEY `FKhumsdcjv9eayw151mw53aht8d` (`teacher_id`),
@@ -359,6 +455,38 @@ CREATE TABLE `student_leave` (
 LOCK TABLES `student_leave` WRITE;
 /*!40000 ALTER TABLE `student_leave` DISABLE KEYS */;
 /*!40000 ALTER TABLE `student_leave` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `student_achievement`
+--
+
+DROP TABLE IF EXISTS `student_achievement`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `student_achievement` (
+  `achievement_id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int DEFAULT NULL,
+  `type` varchar(20) DEFAULT NULL COMMENT 'COMPETITION-竞赛, PUBLICATION-论文, PATENT-专利, PROJECT-项目',
+  `name` varchar(100) DEFAULT NULL COMMENT '成果名称',
+  `level` varchar(50) DEFAULT NULL COMMENT '级别: 国家级, 省级, 校级',
+  `award_date` varchar(20) DEFAULT NULL COMMENT '获奖日期',
+  `description` varchar(500) DEFAULT NULL COMMENT '描述',
+  `certificate_url` varchar(200) DEFAULT NULL COMMENT '证书URL',
+  `status` varchar(20) DEFAULT NULL COMMENT '状态: PENDING-待审核, APPROVED-已审核, REJECTED-已拒绝',
+  PRIMARY KEY (`achievement_id`),
+  KEY `FK_achievement_student` (`student_id`),
+  CONSTRAINT `FK_achievement_student` FOREIGN KEY (`student_id`) REFERENCES `student` (`person_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `student_achievement`
+--
+
+LOCK TABLES `student_achievement` WRITE;
+/*!40000 ALTER TABLE `student_achievement` DISABLE KEYS */;
+/*!40000 ALTER TABLE `student_achievement` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

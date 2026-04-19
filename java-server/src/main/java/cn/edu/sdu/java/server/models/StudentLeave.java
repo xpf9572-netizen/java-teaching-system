@@ -18,12 +18,15 @@ public class StudentLeave {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer studentLeaveId;
 
+    @Version
+    private int version;
+
     @ManyToOne
-    @JoinColumn(name="studentId")
+    @JoinColumn(name="student_id")
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name="teacherId")
+    @JoinColumn(name="teacher_id")
     private Teacher teacher;
 
     @Size(max=50)

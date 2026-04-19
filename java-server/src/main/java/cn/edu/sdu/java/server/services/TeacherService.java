@@ -1,110 +1,152 @@
 package cn.edu.sdu.java.server.services;
 
-import cn.edu.sdu.java.server.models.Person;
-import cn.edu.sdu.java.server.models.Teacher;
+import cn.edu.sdu.java.server.models.*;
 import cn.edu.sdu.java.server.payload.request.DataRequest;
 import cn.edu.sdu.java.server.payload.response.DataResponse;
-import cn.edu.sdu.java.server.repositorys.PersonRepository;
-import cn.edu.sdu.java.server.repositorys.TeacherRepository;
+import cn.edu.sdu.java.server.repositorys.*;
+import cn.edu.sdu.java.server.util.ComDataUtil;
 import cn.edu.sdu.java.server.util.CommonMethod;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import java.util.*;
+import java.util.Optional;
 
 @Service
 public class TeacherService {
-    private final TeacherRepository teacherRepository;
+    private static final Logger log = LoggerFactory.getLogger(TeacherService.class);
     private final PersonRepository personRepository;
+    private final TeacherRepository teacherRepository;
 
-    public TeacherService(TeacherRepository teacherRepository, PersonRepository personRepository) {
-        this.teacherRepository = teacherRepository;
+    public TeacherService(PersonRepository personRepository, TeacherRepository teacherRepository) {
         this.personRepository = personRepository;
+        this.teacherRepository = teacherRepository;
+    }
+
+    public Map<String, Object> getMapFromTeacher(Teacher t) {
+        Map<String, Object> m = new HashMap<>();
+        Person p;
+        if (t == null)
+            return m;
+        m.put("title", t.getTitle());
+        m.put("degree", t.getDegree());
+        p = t.getPerson();
+        if (p == null)
+            return m;
+        m.put("personId", t.getPersonId());
+        m.put("teacherNum", p.getNum());
+        m.put("name", p.getName());
+        m.put("dept", p.getDept());
+        m.put("card", p.getCard());
+        String gender = p.getGender();
+        m.put("gender", gender);
+        m.put("genderName", ComDataUtil.getInstance().getDictionaryLabelByValue("XBM", gender));
+        m.put("birthday", p.getBirthday());
+        m.put("email", p.getEmail());
+        m.put("phone", p.getPhone());
+        m.put("address", p.getAddress());
+        m.put("introduce", p.getIntroduce());
+        return m;
+    }
+
+    public List<Map<String, Object>> getTeacherMapList(String numName) {
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        List<Teacher> tList = teacherRepository.findTeacherListByNumName(numName);
+        if (tList == null || tList.isEmpty())
+            return dataList;
+        for (Teacher teacher : tList) {
+            dataList.add(getMapFromTeacher(teacher));
+        }
+        return dataList;
     }
 
     public DataResponse getTeacherList(DataRequest dataRequest) {
         String numName = dataRequest.getString("numName");
-        if (numName == null) numName = "";
-        List<Teacher> teachers = teacherRepository.findTeacherListByNumName(numName);
-        List<Map<String, Object>> dataList = new ArrayList<>();
-        Map<String, Object> m;
-        for (Teacher t : teachers) {
-            m = new HashMap<>();
-            Person p = t.getPerson();
-            if (p != null) {
-                m.put("id", t.getPersonId());
-                m.put("teacherNum", p.getNum());
-                m.put("name", p.getName());
-                m.put("gender", p.getGender());
-                m.put("department", p.getDept());
-                m.put("phone", p.getPhone());
-                m.put("email", p.getEmail());
-                m.put("address", p.getAddress());
-                m.put("introduce", p.getIntroduce());
-            }
-            m.put("title", t.getTitle());
-            m.put("degree", t.getDegree());
-            dataList.add(m);
-        }
+        List<Map<String, Object>> dataList = getTeacherMapList(numName);
         return CommonMethod.getReturnData(dataList);
     }
 
-    public DataResponse teacherSave(DataRequest dataRequest) {
+    public DataResponse getTeacherInfo(DataRequest dataRequest) {
         Integer personId = dataRequest.getInteger("personId");
-        String teacherNum = dataRequest.getString("teacherNum");
-        String name = dataRequest.getString("name");
-        String gender = dataRequest.getString("gender");
-        String department = dataRequest.getString("department");
-        String phone = dataRequest.getString("phone");
-        String email = dataRequest.getString("email");
-        String address = dataRequest.getString("address");
-        String introduce = dataRequest.getString("introduce");
-        String title = dataRequest.getString("title");
-        String degree = dataRequest.getString("degree");
-
+        Teacher t = null;
         Optional<Teacher> op;
-        Teacher teacher = null;
-        Person person = null;
-
         if (personId != null) {
             op = teacherRepository.findById(personId);
             if (op.isPresent()) {
-                teacher = op.get();
-                person = teacher.getPerson();
+                t = op.get();
             }
         }
-
-        if (teacher == null) {
-            teacher = new Teacher();
-            person = new Person();
-            person.setType("2"); // 教师类型
-        }
-
-        person.setNum(teacherNum);
-        person.setName(name);
-        person.setGender(gender);
-        person.setDept(department);
-        person.setPhone(phone);
-        person.setEmail(email);
-        person.setAddress(address);
-        person.setIntroduce(introduce);
-        person = personRepository.save(person);
-
-        teacher.setPerson(person);
-        teacher.setTitle(title);
-        teacher.setDegree(degree);
-        teacherRepository.save(teacher);
-
-        return CommonMethod.getReturnMessageOK();
+        return CommonMethod.getReturnData(getMapFromTeacher(t));
     }
 
     public DataResponse teacherDelete(DataRequest dataRequest) {
         Integer personId = dataRequest.getInteger("personId");
-        if (personId != null) {
-            Optional<Teacher> op = teacherRepository.findById(personId);
+        Teacher t = null;
+        Optional<Teacher> op;
+        if (personId != null && personId > 0) {
+            op = teacherRepository.findById(personId);
             if (op.isPresent()) {
-                Teacher teacher = op.get();
-                teacherRepository.delete(teacher);
+                t = op.get();
+                Person p = t.getPerson();
+                teacherRepository.delete(t);
+                personRepository.delete(p);
             }
         }
         return CommonMethod.getReturnMessageOK();
+    }
+
+    public DataResponse teacherEditSave(DataRequest dataRequest) {
+        Integer personId = dataRequest.getInteger("personId");
+        Map<String, Object> form = dataRequest.getMap("form");
+        String num = CommonMethod.getString(form, "teacherNum");
+        Teacher t = null;
+        Person p;
+        Optional<Teacher> op;
+        boolean isNew = false;
+        if (personId != null) {
+            op = teacherRepository.findById(personId);
+            if (op.isPresent()) {
+                t = op.get();
+            }
+        }
+        Optional<Person> nOp = personRepository.findByNum(num);
+        if (nOp.isPresent()) {
+            if (t == null || !t.getPerson().getNum().equals(num)) {
+                return CommonMethod.getReturnMessageError("新工号已经存在，不能添加或修改！");
+            }
+        }
+        if (t == null) {
+            p = new Person();
+            p.setNum(num);
+            p.setType("2");
+            personRepository.saveAndFlush(p);
+            personId = p.getPersonId();
+            t = new Teacher();
+            t.setPersonId(personId);
+            teacherRepository.saveAndFlush(t);
+            isNew = true;
+        } else {
+            p = t.getPerson();
+        }
+        personId = p.getPersonId();
+        if (!num.equals(p.getNum())) {
+            p.setNum(num);
+        }
+        p.setName(CommonMethod.getString(form, "name"));
+        p.setDept(CommonMethod.getString(form, "dept"));
+        p.setCard(CommonMethod.getString(form, "card"));
+        p.setGender(CommonMethod.getString(form, "gender"));
+        p.setBirthday(CommonMethod.getString(form, "birthday"));
+        p.setEmail(CommonMethod.getString(form, "email"));
+        p.setPhone(CommonMethod.getString(form, "phone"));
+        p.setAddress(CommonMethod.getString(form, "address"));
+        p.setIntroduce(CommonMethod.getString(form, "introduce"));
+        personRepository.save(p);
+        t.setTitle(CommonMethod.getString(form, "title"));
+        t.setDegree(CommonMethod.getString(form, "degree"));
+        teacherRepository.save(t);
+        return CommonMethod.getReturnData(t.getPersonId());
     }
 }

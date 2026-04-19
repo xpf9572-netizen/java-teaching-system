@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.teach.javafx.controller.StudentScheduleController">
+
+    <top>
+        <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
+            <padding>
+                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+            </padding>
+            <Label text="我的课表" style="-fx-font-size: 18px; -fx-font-weight: bold;">
+                <font>
+                    <Font size="18"/>
+                </font>
+            </Label>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <FlowPane alignment="TOP_RIGHT" prefHeight="40.0" prefWidth="400.0" BorderPane.alignment="CENTER">
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Label text="学期："/>
+                    <ComboBox fx:id="semesterComboBox" prefWidth="150.0" onAction="#onSemesterSelected"/>
+                    <Button text="刷新" onAction="#onQueryButtonClick"/>
+                </HBox>
+            </FlowPane>
+        </HBox>
+    </top>
+
+    <center>
+        <TableView fx:id="dataTableView">
+            <columns>
+                <TableColumn fx:id="dayOfWeekColumn" prefWidth="80.0" text="星期"/>
+                <TableColumn fx:id="classPeriodColumn" prefWidth="80.0" text="节次"/>
+                <TableColumn fx:id="courseNameColumn" prefWidth="200.0" text="课程名称"/>
+                <TableColumn fx:id="courseNumColumn" prefWidth="100.0" text="课程编号"/>
+                <TableColumn fx:id="teacherNameColumn" prefWidth="100.0" text="授课教师"/>
+                <TableColumn fx:id="locationColumn" prefWidth="120.0" text="上课地点"/>
+                <TableColumn fx:id="creditColumn" prefWidth="60.0" text="学分"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <FlowPane alignment="CENTER" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <Button text="刷新课表" onAction="#onQueryButtonClick"/>
+        </FlowPane>
+    </bottom>
+</BorderPane>

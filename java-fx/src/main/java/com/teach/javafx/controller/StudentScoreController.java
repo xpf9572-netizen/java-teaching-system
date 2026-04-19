@@ -113,4 +113,8 @@ public class StudentScoreController {
             dataTableView.getItems().add(displayMap);
         }
     }
+
+    public void doRefresh() {
+        onQueryButtonClick();
+    }
 }

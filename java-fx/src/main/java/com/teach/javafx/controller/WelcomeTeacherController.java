@@ -76,8 +76,8 @@ public class WelcomeTeacherController {
         try {
             Integer teacherId = AppStore.getJwt().getId();
             DataRequest req = new DataRequest();
-            req.add("personId", teacherId);
-            DataResponse res = HttpRequestUtil.request("/api/course/getCourseList", req);
+            req.add("teacherId", teacherId);
+            DataResponse res = HttpRequestUtil.request("/api/course/getCourseListByTeacher", req);
 
             if (res != null && res.getCode() == 0) {
                 List<Map<String, Object>> courseList = (List<Map<String, Object>>) res.getData();

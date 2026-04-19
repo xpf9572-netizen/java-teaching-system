@@ -13,6 +13,7 @@ import cn.edu.sdu.java.server.repositorys.TeacherRepository;
 import cn.edu.sdu.java.server.util.ComDataUtil;
 import cn.edu.sdu.java.server.util.CommonMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.management.PlatformLoggingMXBean;
 import java.util.*;
@@ -80,6 +81,7 @@ public class StudentLeaveService {
         return CommonMethod.getReturnData(dataList);
     }
 
+    @Transactional
     public DataResponse studentLeaveSave(DataRequest dataRequest) {
         Integer state = dataRequest.getInteger("state");
         Integer studentLeaveId = dataRequest.getInteger("studentLeaveId");
@@ -98,7 +100,8 @@ public class StudentLeaveService {
             sl.setApplyTime(new Date());
             sl.setTeacherComment("");
             sl.setAdminComment("");
-            sl.setStudent(studentRepository.findByPersonNum(CommonMethod.getUsername()).get());
+            sl.setStudent(studentRepository.findByPersonNum(CommonMethod.getUsername())
+                    .orElseThrow(() -> new RuntimeException("当前用户对应的学生记录不存在")));
         }
         if(teacherId != null && teacherId > 0) {
             Optional<Teacher> op = teacherRepository.findById(teacherId);
@@ -111,6 +114,7 @@ public class StudentLeaveService {
         studentLeaveRepository.save(sl);
         return CommonMethod.getReturnMessageOK();
     }
+    @Transactional
     public DataResponse studentLeaveCheck(DataRequest dataRequest) {
         String roleName = CommonMethod.getRoleName();
         Integer state = dataRequest.getInteger("state");
@@ -129,7 +133,11 @@ public class StudentLeaveService {
         if("ROLE_ADMIN".equals(roleName)) {
             sl.setAdminComment(adminComment);
             sl.setAdminTime(new Date());
-            sl.setState(state+2);
+            // State transition: 0->2 (pending to approved), 0->3 (pending to rejected), 1->4 (processed to approved), 1->5 (processed to rejected)
+            if (state == null || (state != 0 && state != 2 && state != 3 && state != 4 && state != 5)) {
+                return CommonMethod.getReturnMessageError("无效的状态值");
+            }
+            sl.setState(state + 2);
         } else if("ROLE_TEACHER".equals(roleName)) {
             sl.setTeacherComment(teacherComment);
             sl.setTeacherTime(new Date());

@@ -18,6 +18,10 @@ import com.teach.javafx.request.DataResponse;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -182,6 +186,7 @@ public class MainFrameController {
         }
 
         res = HttpRequestUtil.request("/api/base/getMenuList",req);
+        if (res == null || res.getData() == null) return;
         List<Map> mList = (List<Map>)res.getData();
         initMenuBar(mList);
         initMenuTree(mList);
@@ -201,6 +206,21 @@ public class MainFrameController {
     }
 
     protected void logout(){
+        // 调用后端退出接口
+        try {
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(HttpRequestUtil.serverUrl + "/auth/logout"))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + (AppStore.getJwt() != null ? AppStore.getJwt().getToken() : ""))
+                    .build();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Logout response status: " + response.statusCode());
+        } catch (Exception e) {
+            System.out.println("Logout request failed: " + e.getMessage());
+        }
+
         // 清除JWT token
         AppStore.setJwt(null);
 
@@ -293,6 +313,8 @@ public class MainFrameController {
         String name = tab.getId();
         contentTabPane.getTabs().remove(tab);
         tabMap.remove(name);
+        sceneMap.remove(name);
+        controlMap.remove(name);
     }
     /**
      * ToolController getCurrentToolController() 获取当前显示的面板的控制对象， 如果面板响应编辑菜单中的编辑命名，交互控制需要继承 ToolController， 重写里面的方法

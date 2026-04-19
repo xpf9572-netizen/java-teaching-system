@@ -10,6 +10,7 @@ import cn.edu.sdu.java.server.repositorys.EnrollmentRepository;
 import cn.edu.sdu.java.server.repositorys.StudentRepository;
 import cn.edu.sdu.java.server.util.CommonMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
@@ -53,6 +54,7 @@ public class EnrollmentService {
         return CommonMethod.getReturnData(dataList);
     }
 
+    @Transactional
     public DataResponse enrollmentSave(DataRequest dataRequest) {
         Integer enrollmentId = dataRequest.getInteger("enrollmentId");
         Long studentId = dataRequest.getLong("studentId");

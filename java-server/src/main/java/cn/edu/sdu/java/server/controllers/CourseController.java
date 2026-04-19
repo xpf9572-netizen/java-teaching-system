@@ -4,6 +4,7 @@ import cn.edu.sdu.java.server.payload.request.DataRequest;
 import cn.edu.sdu.java.server.payload.response.DataResponse;
 import cn.edu.sdu.java.server.services.CourseService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -18,7 +19,7 @@ public class CourseController {
     }
 
     @GetMapping("/all")
-    public java.util.Map<String, Object> getAllCourses() {
+    public DataResponse getAllCourses() {
         return courseService.getAllCourses();
     }
 
@@ -28,11 +29,23 @@ public class CourseController {
     }
 
     @PostMapping("/courseSave")
+    @PreAuthorize("hasRole('ADMIN')")
     public DataResponse courseSave(@Valid @RequestBody DataRequest dataRequest) {
         return courseService.courseSave(dataRequest);
     }
     @PostMapping("/courseDelete")
+    @PreAuthorize("hasRole('ADMIN')")
     public DataResponse courseDelete(@Valid @RequestBody DataRequest dataRequest) {
         return courseService.courseDelete(dataRequest);
+    }
+
+    @PostMapping("/getCourseListByTeacher")
+    public DataResponse getCourseListByTeacher(@Valid @RequestBody DataRequest dataRequest) {
+        return courseService.getCourseListByTeacher(dataRequest);
+    }
+
+    @PostMapping("/getCourseOptionList")
+    public DataResponse getCourseOptionList(@Valid @RequestBody DataRequest dataRequest) {
+        return courseService.getCourseOptionList(dataRequest);
     }
 }

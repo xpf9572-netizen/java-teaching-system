@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
 
 <!-- 学生个人简历界面 FXML配置文件 对应页面交互控制类 com.teach.javafx.controller.StudentIntroduceController -->
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
 <BorderPane  maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             style= "-fx-background-image: url('shanda1.jpg'); -fx-background-repeat: no-repeat; -fx-background-size: cover;" fx:controller="com.teach.javafx.controller.CourseController">
+   <top>
+      <HBox spacing="10.0" alignment="CENTER_LEFT">
+         <padding><Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/></padding>
+         <Button text="Add Course" onAction="#onAddButtonClick"/>
+      </HBox>
+   </top>
    <center>
       <TableView fx:id="dataTableView"  >
          <columns>

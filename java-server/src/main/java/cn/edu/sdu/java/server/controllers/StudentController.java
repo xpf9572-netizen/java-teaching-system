@@ -3,6 +3,8 @@ package cn.edu.sdu.java.server.controllers;
 import cn.edu.sdu.java.server.payload.request.DataRequest;
 import cn.edu.sdu.java.server.payload.response.DataResponse;
 import cn.edu.sdu.java.server.services.StudentService;
+import cn.edu.sdu.java.server.services.StudentAchievementService;
+import cn.edu.sdu.java.server.util.CommonMethod;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -26,8 +28,11 @@ import java.util.*;
 
 public class StudentController {
     private final StudentService studentService;
-    public StudentController(StudentService studentService) {
+    private final StudentAchievementService achievementService;
+
+    public StudentController(StudentService studentService, StudentAchievementService achievementService) {
         this.studentService = studentService;
+        this.achievementService = achievementService;
     }
 
     /**
@@ -39,7 +44,7 @@ public class StudentController {
 
 
     @GetMapping("/all")
-    public Map<String, Object> getAllStudents() {
+    public DataResponse getAllStudents() {
         List<cn.edu.sdu.java.server.models.Student> students = studentService.getStudentListAll();
         List<Map<String, Object>> dataList = new ArrayList<>();
         for (cn.edu.sdu.java.server.models.Student s : students) {
@@ -50,10 +55,7 @@ public class StudentController {
             m.put("className", s.getClassName());
             dataList.add(m);
         }
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("data", dataList);
-        return result;
+        return CommonMethod.getReturnData(dataList);
     }
 
     @PostMapping("/getStudentList")
@@ -126,7 +128,7 @@ public class StudentController {
      *
      */
     @PostMapping("/getStudentListExcl")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StreamingResponseBody> getStudentListExcl(@Valid @RequestBody DataRequest dataRequest) {
         return studentService.getStudentListExcl(dataRequest);
     }
@@ -170,5 +172,50 @@ public class StudentController {
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public DataResponse getStudentIntroduceData(@Valid @RequestBody DataRequest dataRequest) {
         return studentService.getStudentIntroduceData(dataRequest);
+    }
+
+    /**
+     * 学生成就列表
+     */
+    @PostMapping("/achievement/list")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
+    public DataResponse getAchievementList(@Valid @RequestBody DataRequest dataRequest) {
+        return achievementService.getAchievementList(dataRequest);
+    }
+
+    /**
+     * 保存学生成就
+     */
+    @PostMapping("/achievement/save")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
+    public DataResponse saveAchievement(@Valid @RequestBody DataRequest dataRequest) {
+        return achievementService.saveAchievement(dataRequest);
+    }
+
+    /**
+     * 删除学生成就
+     */
+    @PostMapping("/achievement/delete")
+    @PreAuthorize("hasRole('STUDENT')")
+    public DataResponse deleteAchievement(@Valid @RequestBody DataRequest dataRequest) {
+        return achievementService.deleteAchievement(dataRequest);
+    }
+
+    /**
+     * 审核通过学生成就
+     */
+    @PostMapping("/achievement/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public DataResponse approveAchievement(@Valid @RequestBody DataRequest dataRequest) {
+        return achievementService.approveAchievement(dataRequest);
+    }
+
+    /**
+     * 驳回学生成就
+     */
+    @PostMapping("/achievement/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public DataResponse rejectAchievement(@Valid @RequestBody DataRequest dataRequest) {
+        return achievementService.rejectAchievement(dataRequest);
     }
 }

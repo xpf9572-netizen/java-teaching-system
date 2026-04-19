@@ -9,7 +9,9 @@ import cn.edu.sdu.java.server.repositorys.AttendanceRepository;
 import cn.edu.sdu.java.server.repositorys.CourseRepository;
 import cn.edu.sdu.java.server.repositorys.StudentRepository;
 import cn.edu.sdu.java.server.util.CommonMethod;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,18 +26,27 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/attendance")
 public class AttendanceController {
-    @Autowired
-    private AttendanceRepository attendanceRepository;
-    @Autowired
-    private StudentRepository studentRepository;
-    @Autowired
-    private CourseRepository courseRepository;
+    private static final Logger log = LoggerFactory.getLogger(AttendanceController.class);
+
+    private final AttendanceRepository attendanceRepository;
+    private final StudentRepository studentRepository;
+    private final CourseRepository courseRepository;
+
+    public AttendanceController(AttendanceRepository attendanceRepository,
+                                StudentRepository studentRepository,
+                                CourseRepository courseRepository) {
+        this.attendanceRepository = attendanceRepository;
+        this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository;
+    }
 
     /**
      * 获取课程学生的考勤列表
      * 前端调用: /api/attendance/getAttendanceList
+     * 权限：教师（只能查看自己课程的考勤）或管理员
      */
     @PostMapping("/getAttendanceList")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     public DataResponse getAttendanceList(@RequestBody DataRequest request) {
         Integer courseId = request.getInteger("courseId");
         String attendanceDate = request.getString("attendanceDate");
@@ -78,8 +89,10 @@ public class AttendanceController {
     /**
      * 保存考勤记录
      * 前端调用: /api/attendance/saveAttendance
+     * 权限：教师（只能保存自己课程的考勤）或管理员
      */
     @PostMapping("/saveAttendance")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     public DataResponse saveAttendance(@RequestBody DataRequest request) {
         Integer courseId = request.getInteger("courseId");
         Integer studentId = request.getInteger("studentId");
@@ -99,8 +112,10 @@ public class AttendanceController {
         } else {
             attendance = new Attendance();
             // 设置学生和课程
-            studentRepository.findById(studentId).ifPresent(attendance::setStudent);
-            courseRepository.findById(courseId).ifPresent(attendance::setCourse);
+            attendance.setStudent(studentRepository.findById(studentId)
+                    .orElseThrow(() -> new RuntimeException("学生不存在: studentId=" + studentId)));
+            attendance.setCourse(courseRepository.findById(courseId)
+                    .orElseThrow(() -> new RuntimeException("课程不存在: courseId=" + courseId)));
             // 设置考勤日期
             try {
                 java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(attendanceDate);
@@ -202,7 +217,9 @@ public class AttendanceController {
             try {
                 java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse((String) data.get("attendanceDate"));
                 attendance.setAttendanceDate(date);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                log.warn("Failed to parse attendance date: {}", data.get("attendanceDate"), e);
+            }
         }
         if (data.get("status") != null) attendance.setStatus((String) data.get("status"));
         if (data.get("remark") != null) attendance.setRemark((String) data.get("remark"));
@@ -234,7 +251,9 @@ public class AttendanceController {
                 try {
                     java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse((String) data.get("attendanceDate"));
                     attendance.setAttendanceDate(date);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    log.warn("Failed to parse attendance date: {}", data.get("attendanceDate"), e);
+                }
             }
             if (data.get("status") != null) attendance.setStatus((String) data.get("status"));
             if (data.get("remark") != null) attendance.setRemark((String) data.get("remark"));
@@ -261,5 +280,70 @@ public class AttendanceController {
             result.put("msg", "考勤记录不存在");
         }
         return result;
+    }
+
+    /**
+     * 获取学生的考勤记录列表
+     * 前端调用: /api/attendance/getStudentAttendanceList
+     * 权限：学生（只能查看自己的考勤）
+     */
+    @PostMapping("/getStudentAttendanceList")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('TEACHER') or hasRole('ADMIN')")
+    public DataResponse getStudentAttendanceList(@RequestBody DataRequest request) {
+        Integer personId = request.getInteger("personId");
+        String startDate = request.getString("startDate");
+        String endDate = request.getString("endDate");
+
+        Optional<Student> sOp;
+        if (personId == null || personId <= 0) {
+            String username = CommonMethod.getUsername();
+            sOp = studentRepository.findByPersonNum(username);
+        } else {
+            sOp = studentRepository.findById(personId);
+        }
+
+        if (sOp.isEmpty()) {
+            return CommonMethod.getReturnMessageError("学生不存在！");
+        }
+
+        Student student = sOp.get();
+        List<Attendance> attendanceList = attendanceRepository.findByStudentPersonId(student.getPersonId());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        List<Map<String, Object>> dataList = new ArrayList<>();
+
+        for (Attendance a : attendanceList) {
+            String attendanceDateStr = a.getAttendanceDate() != null ? sdf.format(a.getAttendanceDate()) : "";
+
+            // Date range filter
+            if (startDate != null && !startDate.isEmpty() && a.getAttendanceDate() != null) {
+                try {
+                    if (a.getAttendanceDate().before(sdf.parse(startDate))) {
+                        continue;
+                    }
+                } catch (Exception e) {
+                    // ignore parse error
+                }
+            }
+            if (endDate != null && !endDate.isEmpty() && a.getAttendanceDate() != null) {
+                try {
+                    if (a.getAttendanceDate().after(sdf.parse(endDate))) {
+                        continue;
+                    }
+                } catch (Exception e) {
+                    // ignore parse error
+                }
+            }
+
+            Map<String, Object> m = new HashMap<>();
+            m.put("attendanceId", a.getAttendanceId());
+            m.put("courseName", a.getCourse() != null ? a.getCourse().getName() : "");
+            m.put("attendanceDate", attendanceDateStr);
+            m.put("status", a.getStatus());
+            m.put("remark", a.getRemark());
+            dataList.add(m);
+        }
+
+        return CommonMethod.getReturnData(dataList);
     }
 }

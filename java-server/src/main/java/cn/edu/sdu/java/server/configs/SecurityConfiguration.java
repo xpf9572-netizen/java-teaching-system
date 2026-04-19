@@ -3,6 +3,7 @@ package cn.edu.sdu.java.server.configs;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -34,9 +36,11 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable);
         http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(List.of("*"));
-            configuration.setAllowedMethods(List.of("*"));
-            configuration.setAllowedHeaders(List.of("*"));
+            configuration.setAllowedOrigins(List.of("http://localhost:8005"));
+            configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+            configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+            configuration.setAllowCredentials(true);
+            configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
             return configuration;
         }));
         http
@@ -44,6 +48,12 @@ public class SecurityConfiguration {
                         authz -> {
                             try {
                                 authz
+                                        .requestMatchers("/uploads/**")
+                                        .permitAll()
+                                        .requestMatchers("/auth/**")
+                                        .permitAll()
+                                        .requestMatchers("/api/admin/**")
+                                        .permitAll()
                                         .requestMatchers("/api/**")
                                         .authenticated()
                                         .anyRequest().permitAll();
@@ -64,8 +74,9 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:8005"));
-        configuration.setAllowedMethods(List.of("GET","POST"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
+        configuration.setAllowedMethods(List.of("GET","POST","OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 

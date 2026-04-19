@@ -3,10 +3,12 @@ package cn.edu.sdu.java.server.controllers;
 import cn.edu.sdu.java.server.models.Course;
 import cn.edu.sdu.java.server.models.Enrollment;
 import cn.edu.sdu.java.server.models.Student;
+import cn.edu.sdu.java.server.payload.request.DataRequest;
+import cn.edu.sdu.java.server.payload.response.DataResponse;
 import cn.edu.sdu.java.server.repositorys.CourseRepository;
 import cn.edu.sdu.java.server.repositorys.EnrollmentRepository;
 import cn.edu.sdu.java.server.repositorys.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import cn.edu.sdu.java.server.util.CommonMethod;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,12 +21,117 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/enrollments")
 public class EnrollmentController {
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
-    @Autowired
-    private StudentRepository studentRepository;
-    @Autowired
-    private CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final StudentRepository studentRepository;
+    private final CourseRepository courseRepository;
+
+    public EnrollmentController(EnrollmentRepository enrollmentRepository,
+                                StudentRepository studentRepository,
+                                CourseRepository courseRepository) {
+        this.enrollmentRepository = enrollmentRepository;
+        this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository;
+    }
+
+    /**
+     * 获取当前学生的选课列表
+     */
+    @PostMapping("/my")
+    public DataResponse getMyEnrollments(@RequestBody DataRequest request) {
+        Integer studentId = request.getInteger("studentId");
+        if (studentId == null) {
+            studentId = CommonMethod.getPersonId();
+        }
+
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentPersonId(studentId);
+        List<Map<String, Object>> dataList = new ArrayList<>();
+
+        for (Enrollment e : enrollments) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("enrollmentId", e.getEnrollmentId());
+            m.put("courseId", e.getCourse() != null ? e.getCourse().getCourseId() : null);
+            m.put("courseName", e.getCourse() != null ? e.getCourse().getName() : "");
+            m.put("courseNum", e.getCourse() != null ? e.getCourse().getNum() : "");
+            m.put("credit", e.getCourse() != null ? e.getCourse().getCredit() : null);
+            m.put("semester", e.getSemester());
+            m.put("score", e.getScore());
+            m.put("status", e.getStatus());
+            dataList.add(m);
+        }
+
+        return CommonMethod.getReturnData(dataList);
+    }
+
+    /**
+     * 保存选课（新增或更新）
+     */
+    @PostMapping("/save")
+    public DataResponse saveEnrollment(@RequestBody DataRequest request) {
+        Integer enrollmentId = request.getInteger("enrollmentId");
+        Integer studentId = request.getInteger("studentId");
+        Integer courseId = request.getInteger("courseId");
+        String semester = request.getString("semester");
+        Double score = request.getDouble("score");
+
+        if (studentId == null || courseId == null) {
+            return CommonMethod.getReturnMessageError("学生ID和课程ID不能为空");
+        }
+
+        Enrollment enrollment = null;
+        if (enrollmentId != null && enrollmentId > 0) {
+            Optional<Enrollment> op = enrollmentRepository.findById(enrollmentId);
+            if (op.isPresent()) {
+                enrollment = op.get();
+            }
+        }
+
+        if (enrollment == null) {
+            // 检查是否重复选课
+            Optional<Enrollment> existing = enrollmentRepository.findByStudentAndCourseAndSemester(studentId, courseId, semester);
+            if (existing.isPresent()) {
+                return CommonMethod.getReturnMessageError("该学生已在相同学期选过此课程，不能重复选课！");
+            }
+            enrollment = new Enrollment();
+        }
+
+        Optional<Student> studentOpt = studentRepository.findById(studentId);
+        if (studentOpt.isEmpty()) {
+            return CommonMethod.getReturnMessageError("学生不存在");
+        }
+        enrollment.setStudent(studentOpt.get());
+
+        Optional<Course> courseOpt = courseRepository.findById(courseId);
+        if (courseOpt.isEmpty()) {
+            return CommonMethod.getReturnMessageError("课程不存在");
+        }
+        enrollment.setCourse(courseOpt.get());
+
+        if (semester != null) enrollment.setSemester(semester);
+        if (score != null) enrollment.setScore(score);
+        if (enrollment.getStatus() == null) enrollment.setStatus("选课中");
+
+        enrollmentRepository.save(enrollment);
+        return CommonMethod.getReturnMessageOK();
+    }
+
+    /**
+     * 删除选课
+     */
+    @PostMapping("/delete")
+    public DataResponse deleteEnrollment(@RequestBody DataRequest request) {
+        Integer enrollmentId = request.getInteger("enrollmentId");
+        if (enrollmentId == null || enrollmentId <= 0) {
+            return CommonMethod.getReturnMessageError("选课ID不能为空");
+        }
+
+        Optional<Enrollment> op = enrollmentRepository.findById(enrollmentId);
+        if (op.isEmpty()) {
+            return CommonMethod.getReturnMessageError("选课记录不存在");
+        }
+
+        enrollmentRepository.delete(op.get());
+        return CommonMethod.getReturnMessageOK();
+    }
 
     @GetMapping
     public Map<String, Object> getEnrollments(

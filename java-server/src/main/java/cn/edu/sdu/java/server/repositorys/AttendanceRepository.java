@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, Integer> {
@@ -13,4 +14,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
             @Param("studentId") Integer studentId,
             @Param("courseId") Integer courseId,
             @Param("dateStr") String dateStr);
+
+    @Query("from Attendance where student.personId = :studentId")
+    List<Attendance> findByStudentPersonId(@Param("studentId") Integer studentId);
 }

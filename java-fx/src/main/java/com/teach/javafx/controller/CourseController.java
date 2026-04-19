@@ -1,18 +1,27 @@
 package com.teach.javafx.controller;
 
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.cell.MapValueFactory;
 import com.teach.javafx.request.HttpRequestUtil;
+import com.teach.javafx.MainApplication;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.FlowPane;
 import com.teach.javafx.request.DataRequest;
 import com.teach.javafx.request.DataResponse;
+import com.teach.javafx.controller.base.MessageDialog;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +48,9 @@ public class CourseController {
 
     private List<Map<String,Object>> courseList = new ArrayList<>();  // 学生信息列表数据
     private final ObservableList<Map<String,Object>> observableList= FXCollections.observableArrayList();  // TableView渲染列表
+
+    private com.teach.javafx.controller.CourseAddDialogController courseAddDialogController = null;
+    private javafx.stage.Stage dialogStage = null;
 
     @FXML
     private void onQueryButtonClick(){
@@ -116,6 +128,62 @@ public class CourseController {
             onQueryButtonClick();
         } else {
             System.out.println("删除失败: " + (res != null ? res.getMsg() : "未知错误"));
+        }
+    }
+
+    @FXML
+    private void onAddButtonClick() {
+        initDialog();
+        courseAddDialogController.init();
+        MainApplication.setCanClose(false);
+        dialogStage.showAndWait();
+    }
+
+    private void initDialog() {
+        if (dialogStage != null)
+            return;
+        FXMLLoader fxmlLoader;
+        Scene scene = null;
+        try {
+            fxmlLoader = new FXMLLoader(MainApplication.class.getResource("course-add-dialog.fxml"));
+            scene = new Scene(fxmlLoader.load(), 300, 200);
+            dialogStage = new javafx.stage.Stage();
+            dialogStage.initOwner(MainApplication.getMainStage());
+            dialogStage.initModality(javafx.stage.Modality.NONE);
+            dialogStage.setAlwaysOnTop(true);
+            dialogStage.setScene(scene);
+            dialogStage.setTitle("添加课程对话框");
+            dialogStage.setOnCloseRequest(event -> {
+                MainApplication.setCanClose(true);
+            });
+            courseAddDialogController = (com.teach.javafx.controller.CourseAddDialogController) fxmlLoader.getController();
+            courseAddDialogController.setCourseController(this);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void doClose(String cmd, Map<String, Object> data) {
+        MainApplication.setCanClose(true);
+        dialogStage.close();
+        if (!"ok".equals(cmd))
+            return;
+
+        DataRequest req = new DataRequest();
+        req.add("num", data.get("num"));
+        req.add("name", data.get("name"));
+        req.add("credit", data.get("credit"));
+        req.add("coursePath", data.get("coursePath"));
+        if (data.get("preCourseId") != null) {
+            req.add("preCourseId", data.get("preCourseId"));
+        }
+
+        DataResponse res = HttpRequestUtil.request("/api/course/courseSave", req);
+        if (res != null && res.getCode() == 0) {
+            MessageDialog.showDialog("保存成功!");
+            onQueryButtonClick();
+        } else {
+            MessageDialog.showDialog("保存失败: " + (res != null ? res.getMsg() : "未知错误"));
         }
     }
 

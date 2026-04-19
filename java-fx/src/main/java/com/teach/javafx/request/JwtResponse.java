@@ -14,6 +14,8 @@ public class JwtResponse {
     private String username;
     private String token;
     private String role;
+    private String perName;
+    private String serverName;
 
     public String getTokenType() {
         return tokenType;
@@ -53,5 +55,21 @@ public class JwtResponse {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPerName() {
+        return perName;
+    }
+
+    public void setPerName(String perName) {
+        this.perName = perName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
     }
 }

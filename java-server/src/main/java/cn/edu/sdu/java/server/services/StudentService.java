@@ -7,6 +7,8 @@ import cn.edu.sdu.java.server.repositorys.*;
 import cn.edu.sdu.java.server.util.ComDataUtil;
 import cn.edu.sdu.java.server.util.CommonMethod;
 import cn.edu.sdu.java.server.util.DateTimeTool;
+
+import java.security.SecureRandom;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.*;
@@ -164,7 +166,14 @@ public class StudentService {
             p.setType("1");
             personRepository.saveAndFlush(p);  //插入新的Person记录
             personId = p.getPersonId();
-            String password = encoder.encode("123456");
+            // 生成随机8位密码
+            SecureRandom random = new SecureRandom();
+            String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+            StringBuilder passwordBuilder = new StringBuilder();
+            for (int i = 0; i < 8; i++) {
+                passwordBuilder.append(chars.charAt(random.nextInt(chars.length())));
+            }
+            String password = encoder.encode(passwordBuilder.toString());
             u = new User();
             u.setPersonId(personId);
             u.setUserName(num);
@@ -281,7 +290,8 @@ public class StudentService {
 
     public String importFeeData(Integer personId, InputStream in){
         try {
-            Student student = studentRepository.findById(personId).get();
+            Student student = studentRepository.findById(personId)
+                    .orElseThrow(() -> new RuntimeException("学生不存在: personId=" + personId));
             XSSFWorkbook workbook = new XSSFWorkbook(in);  //打开Excl数据流
             XSSFSheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
@@ -464,7 +474,8 @@ public class StudentService {
         if(f== null) {
             f = new FamilyMember();
             assert personId != null;
-            f.setStudent(studentRepository.findById(personId).get());
+            f.setStudent(studentRepository.findById(personId)
+                .orElseThrow(() -> new RuntimeException("学生不存在: personId=" + personId)));
         }
         f.setRelation(CommonMethod.getString(form,"relation"));
         f.setName(CommonMethod.getString(form,"name"));
