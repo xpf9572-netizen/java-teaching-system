@@ -71,7 +71,7 @@ public class ScoreAnalysisService {
             return CommonMethod.getReturnMessageError("classId不能为空");
         }
 
-        List<Student> students = studentRepository.findByClassName("");
+        List<Student> students = studentRepository.findAll();
         students = students.stream().filter(s ->
             s.getClassName() != null && s.getClassName().contains(classId.toString())
         ).toList();

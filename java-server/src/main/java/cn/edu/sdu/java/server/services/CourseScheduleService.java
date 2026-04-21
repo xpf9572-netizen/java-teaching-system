@@ -122,6 +122,7 @@ public class CourseScheduleService {
 
         Optional<CourseSchedule> op = scheduleRepository.findById(scheduleId);
         if (op.isPresent()) {
+            CommonMethod.logDeleteOperation("course_schedule", scheduleId);
             scheduleRepository.delete(op.get());
             return CommonMethod.getReturnMessageOK();
         } else {
@@ -135,7 +136,7 @@ public class CourseScheduleService {
             teacherId = CommonMethod.getPersonId();
         }
 
-        List<CourseSchedule> schedules = scheduleRepository.findByTeacherTeacherId(teacherId);
+        List<CourseSchedule> schedules = scheduleRepository.findByTeacherPersonId(teacherId);
         List<Map<String, Object>> dataList = new ArrayList<>();
         for (CourseSchedule cs : schedules) {
             dataList.add(scheduleToMap(cs));

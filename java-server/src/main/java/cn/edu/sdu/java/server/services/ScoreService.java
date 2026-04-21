@@ -122,6 +122,7 @@ public class ScoreService {
                 if (teacherId == null) {
                     return CommonMethod.getReturnMessageError("用户未登录");
                 }
+                CommonMethod.logDeleteOperation("score", scoreId);
                 scoreRepository.delete(s);
             }
         }

@@ -101,6 +101,7 @@ public class NoticeService {
             op = noticeRepository.findById(noticeId);
             if (op.isPresent()) {
                 n = op.get();
+                CommonMethod.logDeleteOperation("notice", noticeId);
                 noticeRepository.delete(n);
             }
         }

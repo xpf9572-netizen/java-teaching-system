@@ -108,6 +108,7 @@ public class ExamService {
 
         Optional<Exam> op = examRepository.findById(examId);
         if (op.isPresent()) {
+            CommonMethod.logDeleteOperation("exam", examId);
             examRepository.delete(op.get());
             return CommonMethod.getReturnMessageOK();
         } else {
@@ -185,6 +186,7 @@ public class ExamService {
 
         Optional<ExamViolation> op = violationRepository.findById(violationId);
         if (op.isPresent()) {
+            CommonMethod.logDeleteOperation("exam_violation", violationId);
             violationRepository.delete(op.get());
             return CommonMethod.getReturnMessageOK();
         } else {

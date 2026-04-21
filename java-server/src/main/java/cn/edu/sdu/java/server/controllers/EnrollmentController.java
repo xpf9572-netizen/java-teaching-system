@@ -129,6 +129,7 @@ public class EnrollmentController {
             return CommonMethod.getReturnMessageError("选课记录不存在");
         }
 
+        CommonMethod.logDeleteOperation("enrollment", enrollmentId);
         enrollmentRepository.delete(op.get());
         return CommonMethod.getReturnMessageOK();
     }
@@ -294,6 +295,7 @@ public class EnrollmentController {
         Optional<Enrollment> op = enrollmentRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
         if (op.isPresent()) {
+            CommonMethod.logDeleteOperation("enrollment", id);
             enrollmentRepository.delete(op.get());
             result.put("success", true);
         } else {

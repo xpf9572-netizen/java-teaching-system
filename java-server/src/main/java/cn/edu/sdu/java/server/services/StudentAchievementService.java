@@ -136,6 +136,7 @@ public class StudentAchievementService {
                 if (!isAdmin && !sa.getStudent().getPersonId().equals(currentPersonId)) {
                     return CommonMethod.getReturnMessageError("无权限删除他人成就");
                 }
+                CommonMethod.logDeleteOperation("student_achievement", achievementId);
                 achievementRepository.delete(sa);
             }
         }

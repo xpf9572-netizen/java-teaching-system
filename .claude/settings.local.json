@@ -5,7 +5,12 @@
       "Bash(\"/d/AI/JDK/apache-maven-3.9.13/bin/mvn.cmd\" spring-boot:run)",
       "Bash(curl -s -X POST http://localhost:22222/auth/login -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"123456\"}')",
       "Bash(curl -s http://localhost:22222/)",
-      "Bash(\"/d/AI/JDK/apache-maven-3.9.13/bin/mvn.cmd\" clean:*)"
+      "Bash(\"/d/AI/JDK/apache-maven-3.9.13/bin/mvn.cmd\" clean:*)",
+      "Bash(mvn clean:*)",
+      "Bash(cmd.exe //c \"mvn clean compile\")",
+      "Bash(cmd.exe //c \"cd java-server && mvn clean compile\")",
+      "Bash(timeout 30 mvn spring-boot:run)",
+      "Bash(mvn compile:*)"
     ]
   }
 }

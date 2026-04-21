@@ -17,4 +17,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
 
     @Query("from Attendance where student.personId = :studentId")
     List<Attendance> findByStudentPersonId(@Param("studentId") Integer studentId);
+
+    boolean existsByCourseCourseId(Integer courseId);
+    long countByCourseCourseId(Integer courseId);
 }

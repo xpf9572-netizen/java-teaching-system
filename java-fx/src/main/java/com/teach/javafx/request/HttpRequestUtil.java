@@ -258,6 +258,52 @@ public class HttpRequestUtil {
         return null;
     }
 
+    /**
+     * void downloadFile(String url, String fileName) 下载文件
+     * @param url  Web请求的Url
+     * @param fileName 本地保存文件名
+     */
+    public static void downloadFile(String url, String fileName) {
+        try {
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(serverUrl + url))
+                    .GET()
+                    .headers("Authorization", "Bearer " + AppStore.getJwt().getToken())
+                    .build();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<byte[]> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
+            if (response.statusCode() == 200) {
+                java.nio.file.Files.write(Path.of(fileName), response.body());
+                System.out.println("File downloaded: " + fileName);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
+    /**
+     * void downloadFileWithRequest(String url, DataRequest request, String fileName) 带请求参数下载文件
+     * @param url  Web请求的Url
+     * @param request 请求参数
+     * @param fileName 本地保存文件名
+     */
+    public static void downloadFileWithRequest(String url, DataRequest request, String fileName) {
+        try {
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(serverUrl + url))
+                    .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(request)))
+                    .headers("Content-Type", "application/json")
+                    .headers("Authorization", "Bearer " + AppStore.getJwt().getToken())
+                    .build();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<byte[]> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
+            if (response.statusCode() == 200) {
+                java.nio.file.Files.write(Path.of(fileName), response.body());
+                System.out.println("File downloaded: " + fileName);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

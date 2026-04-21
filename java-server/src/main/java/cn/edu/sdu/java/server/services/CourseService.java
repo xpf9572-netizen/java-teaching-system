@@ -5,6 +5,9 @@ import cn.edu.sdu.java.server.payload.request.DataRequest;
 import cn.edu.sdu.java.server.payload.response.DataResponse;
 import cn.edu.sdu.java.server.repositorys.CourseRepository;
 import cn.edu.sdu.java.server.repositorys.EnrollmentRepository;
+import cn.edu.sdu.java.server.repositorys.CourseScheduleRepository;
+import cn.edu.sdu.java.server.repositorys.ScoreRepository;
+import cn.edu.sdu.java.server.repositorys.AttendanceRepository;
 import cn.edu.sdu.java.server.util.CommonMethod;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -13,10 +16,18 @@ import java.util.*;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final CourseScheduleRepository courseScheduleRepository;
+    private final ScoreRepository scoreRepository;
+    private final AttendanceRepository attendanceRepository;
 
-    public CourseService(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository) {
+    public CourseService(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository,
+                        CourseScheduleRepository courseScheduleRepository, ScoreRepository scoreRepository,
+                        AttendanceRepository attendanceRepository) {
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.courseScheduleRepository = courseScheduleRepository;
+        this.scoreRepository = scoreRepository;
+        this.attendanceRepository = attendanceRepository;
     }
 
     public DataResponse getCourseList(DataRequest dataRequest) {
@@ -87,6 +98,23 @@ public class CourseService {
             op = courseRepository.findById(courseId);
             if(op.isPresent()) {
                 c = op.get();
+                // 检查是否有选课记录关联到此课程
+                if (enrollmentRepository.existsByCourseCourseId(courseId)) {
+                    return CommonMethod.getReturnMessageError("该数据已被使用，无法删除");
+                }
+                // 检查是否有课程安排关联到此课程
+                if (courseScheduleRepository.existsByCourseCourseId(courseId)) {
+                    return CommonMethod.getReturnMessageError("该数据已被使用，无法删除");
+                }
+                // 检查是否有成绩记录关联到此课程
+                if (scoreRepository.existsByCourseCourseId(courseId)) {
+                    return CommonMethod.getReturnMessageError("该数据已被使用，无法删除");
+                }
+                // 检查是否有考勤记录关联到此课程
+                if (attendanceRepository.existsByCourseCourseId(courseId)) {
+                    return CommonMethod.getReturnMessageError("该数据已被使用，无法删除");
+                }
+                CommonMethod.logDeleteOperation("course", courseId);
                 courseRepository.delete(c);
             }
         }

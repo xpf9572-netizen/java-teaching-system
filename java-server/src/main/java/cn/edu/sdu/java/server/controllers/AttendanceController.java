@@ -273,6 +273,7 @@ public class AttendanceController {
         Optional<Attendance> op = attendanceRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
         if (op.isPresent()) {
+            CommonMethod.logDeleteOperation("attendance", id);
             attendanceRepository.delete(op.get());
             result.put("success", true);
         } else {

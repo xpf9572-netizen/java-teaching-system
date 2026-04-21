@@ -69,7 +69,10 @@ public class SystemInfoService {
         Integer id = dataRequest.getInteger("id");
         if (id != null && id > 0) {
             Optional<SystemInfo> op = systemInfoRepository.findById(id);
-            op.ifPresent(systemInfoRepository::delete);
+            if (op.isPresent()) {
+                CommonMethod.logDeleteOperation("system_info", id);
+                systemInfoRepository.delete(op.get());
+            }
         }
         return CommonMethod.getReturnMessageOK();
     }

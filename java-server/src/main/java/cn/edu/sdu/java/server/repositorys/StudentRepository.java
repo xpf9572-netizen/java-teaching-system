@@ -32,4 +32,6 @@ public interface StudentRepository extends JpaRepository<Student,Integer> {
 
     @Query("select e.student from Enrollment e where e.course.courseId = ?1 and e.semester = ?2")
     List<Student> findStudentsByCourseIdAndSemester(Integer courseId, String semester);
+
+    long countByClassName(String className);
 }

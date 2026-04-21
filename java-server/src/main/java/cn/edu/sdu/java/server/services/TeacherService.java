@@ -90,6 +90,7 @@ public class TeacherService {
             if (op.isPresent()) {
                 t = op.get();
                 Person p = t.getPerson();
+                CommonMethod.logDeleteOperation("teacher", personId);
                 teacherRepository.delete(t);
                 personRepository.delete(p);
             }

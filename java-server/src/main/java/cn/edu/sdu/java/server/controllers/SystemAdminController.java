@@ -32,6 +32,7 @@ public class SystemAdminController {
         try {
             // 1. 删除错误的学生菜单
             List<MenuInfo> allMenus = menuInfoRepository.findAll();
+            int deletedCount = 0;
 
             // 删除所有 userTypeIds 包含 '1' 但 name 是学生相关的菜单
             for (MenuInfo menu : allMenus) {
@@ -39,17 +40,20 @@ public class SystemAdminController {
                     // 删除WelcomeStudentPanel如果不是仅学生
                     if (menu.getName().equals("WelcomeStudentPanel") && !menu.getUserTypeIds().equals("2")) {
                         menuInfoRepository.delete(menu);
+                        deletedCount++;
                         continue;
                     }
                     // 删除StudentScorePanel如果userTypeIds不对
                     if (menu.getName().equals("StudentScorePanel") && !menu.getUserTypeIds().equals("2")) {
                         menuInfoRepository.delete(menu);
+                        deletedCount++;
                         continue;
                     }
                     // 删除学生相关菜单如果userTypeIds不是'2'或以'2'开头
                     if (menu.getName() != null && menu.getName().startsWith("student") && menu.getName().endsWith("panel")) {
                         if (menu.getUserTypeIds() != null && !menu.getUserTypeIds().contains("2")) {
                             menuInfoRepository.delete(menu);
+                            deletedCount++;
                             continue;
                         }
                     }
@@ -60,6 +64,7 @@ public class SystemAdminController {
             for (MenuInfo menu : allMenus) {
                 if (menu.getName() != null && menu.getName().equals("WelcomeTeacherPanel")) {
                     menuInfoRepository.delete(menu);
+                    deletedCount++;
                 }
             }
 
@@ -67,8 +72,11 @@ public class SystemAdminController {
             for (MenuInfo menu : allMenus) {
                 if (menu.getName() != null && menu.getName().startsWith("Teacher")) {
                     menuInfoRepository.delete(menu);
+                    deletedCount++;
                 }
             }
+
+            CommonMethod.logDeleteOperation("menu_info", "repair_deleted:" + deletedCount);
 
             // 4. 获取最大ID
             int maxId = 100;

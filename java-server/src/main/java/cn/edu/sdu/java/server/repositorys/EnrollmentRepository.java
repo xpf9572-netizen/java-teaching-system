@@ -24,4 +24,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("select distinct e.course from Enrollment e where e.student.personId = ?1 and e.semester = ?2")
     List<Course> findCoursesByStudentIdAndSemester(Integer studentId, String semester);
+
+    boolean existsByCourseCourseId(Integer courseId);
+    long countByCourseCourseId(Integer courseId);
 }

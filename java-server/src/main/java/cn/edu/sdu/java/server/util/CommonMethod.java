@@ -9,19 +9,24 @@ import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * CommonMethod 公共处理方法实例类
  */
 public class CommonMethod {
+    private static final Logger log = LoggerFactory.getLogger(CommonMethod.class);
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static final MediaType exelType = new MediaType("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     public static DataResponse getReturnData(Object obj, String msg){
         return new   DataResponse(0,obj,msg);
@@ -63,6 +68,20 @@ public class CommonMethod {
         if(!(obj instanceof UserDetailsImpl userDetails))
             return null;
         return  userDetails.getAuthorities().iterator().next().toString();
+    }
+
+    /**
+     * 记录删除操作日志
+     * @param tableName 被删除数据的表名
+     * @param dataId 被删除的数据ID
+     */
+    public static void logDeleteOperation(String tableName, Object dataId) {
+        Integer personId = getPersonId();
+        String username = getUsername();
+        String role = getRoleName();
+        String time = sdf.format(new Date());
+        log.info("[DELETE_OPERATION] time={}, operator={{}, id={}, role={}, table={}, deletedId={}",
+                time, username, personId, role, tableName, dataId);
     }
 
     public static String getNextNum2(String num) {

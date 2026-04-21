@@ -29,4 +29,9 @@ public interface CourseScheduleRepository extends JpaRepository<CourseSchedule, 
 
     @Query("SELECT cs FROM CourseSchedule cs WHERE cs.classEntity.classId = ?1 AND cs.semester = ?2 AND cs.dayOfWeek = ?3 AND cs.classPeriod = ?4")
     List<CourseSchedule> findClassConflict(Integer classId, String semester, String dayOfWeek, String classPeriod);
+
+    boolean existsByCourseCourseId(Integer courseId);
+    long countByCourseCourseId(Integer courseId);
+    boolean existsByClassEntityClassId(Integer classId);
+    long countByClassEntityClassId(Integer classId);
 }

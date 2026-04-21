@@ -118,6 +118,7 @@ public class StudentService {
                 //删除对应该学生的账户
                 uOp.ifPresent(userRepository::delete);
                 Person p = s.getPerson();
+                CommonMethod.logDeleteOperation("student", personId);
                 studentRepository.delete(s);    //首先数据库永久删除学生信息
                 personRepository.delete(p);   // 然后数据库永久删除学生信息
             }

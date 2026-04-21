@@ -100,6 +100,7 @@ public class EnrollmentService {
         if (enrollmentId != null) {
             Optional<Enrollment> op = enrollmentRepository.findById(enrollmentId);
             if (op.isPresent()) {
+                CommonMethod.logDeleteOperation("enrollment", enrollmentId);
                 enrollmentRepository.delete(op.get());
             }
         }

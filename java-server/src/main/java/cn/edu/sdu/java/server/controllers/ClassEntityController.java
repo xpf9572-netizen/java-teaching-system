@@ -2,6 +2,9 @@ package cn.edu.sdu.java.server.controllers;
 
 import cn.edu.sdu.java.server.models.ClassEntity;
 import cn.edu.sdu.java.server.repositorys.ClassEntityRepository;
+import cn.edu.sdu.java.server.repositorys.StudentRepository;
+import cn.edu.sdu.java.server.repositorys.CourseScheduleRepository;
+import cn.edu.sdu.java.server.util.CommonMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +21,10 @@ import java.util.*;
 public class ClassEntityController {
     @Autowired
     private ClassEntityRepository classEntityRepository;
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private CourseScheduleRepository courseScheduleRepository;
 
     @GetMapping
     public Map<String, Object> getClasses(
@@ -129,7 +136,21 @@ public class ClassEntityController {
         Optional<ClassEntity> op = classEntityRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
         if (op.isPresent()) {
-            classEntityRepository.delete(op.get());
+            ClassEntity c = op.get();
+            // 检查是否有学生关联到此班级
+            if (studentRepository.countByClassName(c.getClassName()) > 0) {
+                result.put("success", false);
+                result.put("msg", "该数据已被使用，无法删除");
+                return result;
+            }
+            // 检查是否有课程安排关联到此班级
+            if (courseScheduleRepository.existsByClassEntityClassId(id)) {
+                result.put("success", false);
+                result.put("msg", "该数据已被使用，无法删除");
+                return result;
+            }
+            CommonMethod.logDeleteOperation("class_entity", id);
+            classEntityRepository.delete(c);
             result.put("success", true);
         } else {
             result.put("success", false);

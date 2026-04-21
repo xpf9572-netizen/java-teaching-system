@@ -26,4 +26,7 @@ public interface ScoreRepository extends JpaRepository<Score,Integer> {
     @Query("SELECT s FROM Score s JOIN FETCH s.student st JOIN FETCH st.person JOIN FETCH s.course c WHERE (?1 = 0 OR st.personId = ?1) AND (?2 = 0 OR c.courseId = ?2)")
     List<Score> findByStudentCourseWithFetch(Integer personId, Integer courseId);
 
+    boolean existsByCourseCourseId(Integer courseId);
+    long countByCourseCourseId(Integer courseId);
+
 }
