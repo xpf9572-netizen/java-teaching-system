@@ -185,6 +185,18 @@ public class MainFrameController {
             userInfoLabel.setText("用户：" + jwt.getUsername() + " (" + roleName + ")");
         }
 
+        // 注册认证失败回调 — token过期或权限不足时自动跳转登录页
+        HttpRequestUtil.setOnAuthFailure(() -> {
+            javafx.application.Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("登录已过期");
+                alert.setHeaderText("您的登录已过期或权限不足");
+                alert.setContentText("请重新登录");
+                alert.showAndWait();
+                logout();
+            });
+        });
+
         res = HttpRequestUtil.request("/api/base/getMenuList",req);
         if (res == null || res.getData() == null) return;
         List<Map> mList = (List<Map>)res.getData();
@@ -205,7 +217,7 @@ public class MainFrameController {
         logout();
     }
 
-    protected void logout(){
+    public void logout(){
         // 调用后端退出接口
         try {
             HttpRequest httpRequest = HttpRequest.newBuilder()

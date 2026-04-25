@@ -18,16 +18,19 @@ public class ScoreController {
         this.scoreService = scoreService;
     }
     @PostMapping("/getStudentItemOptionList")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public OptionItemList getStudentItemOptionList(@Valid @RequestBody DataRequest dataRequest) {
         return scoreService.getStudentItemOptionList(dataRequest);
     }
 
     @PostMapping("/getCourseItemOptionList")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public OptionItemList getCourseItemOptionList(@Valid @RequestBody DataRequest dataRequest) {
         return scoreService.getCourseItemOptionList(dataRequest);
     }
 
     @PostMapping("/getScoreList")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
     public DataResponse getScoreList(@Valid @RequestBody DataRequest dataRequest) {
         return scoreService.getScoreList(dataRequest);
     }

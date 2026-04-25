@@ -23,11 +23,12 @@ public class SystemApplicationListener implements ApplicationListener<Applicatio
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        log.info(event.toString());
-        log.info("SystemInitStart");
-        systemService.initDictionary();
-        systemService.initSystem();
-        log.info("systemInitEnd");
+        return;
+        //log.info(event.toString());
+        //log.info("SystemInitStart");
+        //systemService.initDictionary();
+        //systemService.initSystem();
+        //log.info("systemInitEnd");
 
     }
 

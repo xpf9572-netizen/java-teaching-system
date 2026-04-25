@@ -73,6 +73,9 @@ public class ScoreService {
         Integer personId = dataRequest.getInteger("personId");
         Integer courseId = dataRequest.getInteger("courseId");
         Integer mark = dataRequest.getInteger("mark");
+        if (mark != null && (mark < 0 || mark > 100)) {
+            return CommonMethod.getReturnMessageError("成绩必须在0-100之间");
+        }
         Integer scoreId = dataRequest.getInteger("scoreId");
         Optional<Score> op;
         Score s = null;

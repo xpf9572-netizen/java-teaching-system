@@ -1,6 +1,7 @@
 package cn.edu.sdu.java.server.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,7 @@ public class FileController {
     private static final String UPLOAD_DIR = "uploads/";
 
     @PostMapping("/upload")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
     public ResponseEntity<Map<String, Object>> uploadFile(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             Map<String, Object> error = new HashMap<>();

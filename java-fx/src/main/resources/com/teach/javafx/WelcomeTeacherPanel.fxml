@@ -57,13 +57,21 @@
 
                 <!-- 统计卡片 -->
                 <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 10, 0, 0);">
-                    <VBox alignment="CENTER" prefWidth="200">
+                    <VBox alignment="CENTER" prefWidth="150">
                         <Label text="教授课程" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
                         <Label fx:id="totalCoursesLabel" text="--" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #2196F3;"/>
                     </VBox>
-                    <VBox alignment="CENTER" prefWidth="200">
+                    <VBox alignment="CENTER" prefWidth="150">
                         <Label text="学生总数" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
                         <Label fx:id="totalStudentsLabel" text="--" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" prefWidth="150">
+                        <Label text="平均成绩" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                        <Label fx:id="totalAvgScoreLabel" text="--" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #FF9800;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" prefWidth="150">
+                        <Label text="及格率" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                        <Label fx:id="totalPassRateLabel" text="--" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;"/>
                     </VBox>
                 </HBox>
 

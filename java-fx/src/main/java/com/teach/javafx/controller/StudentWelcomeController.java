@@ -39,8 +39,12 @@ public class StudentWelcomeController {
     @FXML
     private VBox scoreListVBox;
 
+    @FXML
+    private VBox markListVBox;
+
     private Map<String, Object> studentInfo;
     private List<Map<String, Object>> scoreList;
+    private List<Map<String, Object>> markList;
 
     @FXML
     public void initialize() {
@@ -56,7 +60,7 @@ public class StudentWelcomeController {
                 Map<String, Object> data = (Map<String, Object>) res.getData();
                 studentInfo = (Map<String, Object>) data.get("info");
                 scoreList = (List<Map<String, Object>>) data.get("scoreList");
-                List<Map<String, Object>> markList = (List<Map<String, Object>>) data.get("markList");
+                markList = (List<Map<String, Object>>) data.get("markList");
 
                 // 显示学生基本信息
                 if (studentInfo != null) {
@@ -93,6 +97,11 @@ public class StudentWelcomeController {
                 if (scoreList != null && !scoreList.isEmpty()) {
                     displayScoreList();
                 }
+
+                // 显示成绩分布
+                if (markList != null && !markList.isEmpty()) {
+                    displayMarkList();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,6 +128,19 @@ public class StudentWelcomeController {
             Label moreLabel = new Label("... 共 " + scoreList.size() + " 门课程");
             moreLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
             scoreListVBox.getChildren().add(moreLabel);
+        }
+    }
+
+    private void displayMarkList() {
+        markListVBox.getChildren().clear();
+
+        for (Map<String, Object> item : markList) {
+            String name = (String) item.get("name");
+            Object valueObj = item.get("value");
+            String value = valueObj != null ? valueObj.toString() : "0";
+            Label label = new Label(name + " : " + value + " 门");
+            label.setStyle("-fx-font-size: 14px; -fx-padding: 3 0 3 0;");
+            markListVBox.getChildren().add(label);
         }
     }
 

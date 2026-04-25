@@ -7,7 +7,6 @@ import jakarta.persistence.*;
  * Student student 关联学生 student_id 关联学生的主键 student_id
  * Course course 关联课程 course_id 关联课程的主键 course_id
  * Integer mark 成绩
- * Integer ranking 排名
  */
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +30,4 @@ public class Score {
     private Course course;
 
     private Integer mark;
-    private Integer ranking;
-
 }

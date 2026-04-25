@@ -1,5 +1,6 @@
 package cn.edu.sdu.java.server.services;
 
+
 import cn.edu.sdu.java.server.models.ClassEntity;
 import cn.edu.sdu.java.server.models.Course;
 import cn.edu.sdu.java.server.models.CourseSchedule;
@@ -241,5 +242,47 @@ public class CourseScheduleService {
         m.put("semester", cs.getSemester());
         m.put("remark", cs.getRemark());
         return m;
+    }
+
+    public DataResponse getCourseList() {
+        try {
+            System.out.println("=== Service: getCourseList 开始 ===");
+            List<Course> courses = courseRepository.findAll();
+            System.out.println("查到课程数量: " + courses.size());
+            DataResponse response = new DataResponse();
+            response.setCode(0);
+            response.setData(courses);
+            response.setMsg("成功");
+            return response;
+        } catch (Exception e) {
+            System.out.println("=== Service: getCourseList 报错 ===");
+            e.printStackTrace();
+            DataResponse errorResponse = new DataResponse();
+            errorResponse.setCode(1);
+            errorResponse.setData(null);
+            errorResponse.setMsg("服务器内部错误: " + e.toString());
+            return errorResponse;
+        }
+    }
+
+    public DataResponse getTeacherList() {
+        try {
+            System.out.println("=== getTeacherList 开始 ===");
+            List<Teacher> teachers = teacherRepository.findAll();
+            System.out.println("查到教师数量: " + teachers.size());
+            DataResponse response = new DataResponse();
+            response.setCode(0);
+            response.setData(teachers);
+            response.setMsg("成功");
+            return response;
+        } catch (Exception e) {
+            System.out.println("=== getTeacherList 报错 ===");
+            e.printStackTrace();
+            DataResponse errorResponse = new DataResponse();
+            errorResponse.setCode(1);
+            errorResponse.setData(null);
+            errorResponse.setMsg("服务器内部错误: " + e.toString());
+            return errorResponse;
+        }
     }
 }

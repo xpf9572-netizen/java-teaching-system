@@ -66,19 +66,15 @@ public class ScoreAnalysisService {
     }
 
     public DataResponse getClassAnalysis(DataRequest dataRequest) {
-        Integer classId = dataRequest.getInteger("classId");
-        if (classId == null) {
-            return CommonMethod.getReturnMessageError("classId不能为空");
+        String className = dataRequest.getString("className");
+        if (className == null || className.isEmpty()) {
+            return CommonMethod.getReturnMessageError("班级名称不能为空");
         }
 
-        List<Student> students = studentRepository.findAll();
-        students = students.stream().filter(s ->
-            s.getClassName() != null && s.getClassName().contains(classId.toString())
-        ).toList();
+        List<Student> students = studentRepository.findByClassName(className);
 
         if (students.isEmpty()) {
-            students = studentRepository.findAll();
-            students = students.stream().limit(10).toList();
+            return CommonMethod.getReturnData(new ArrayList<>());
         }
 
         List<Map<String, Object>> classAnalysis = new ArrayList<>();

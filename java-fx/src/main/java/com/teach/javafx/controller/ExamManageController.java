@@ -121,9 +121,25 @@ public class ExamManageController {
         int j = Integer.parseInt(name.substring(9));
         Map<String, Object> data = examList.get(j);
         Integer examId = (Integer) data.get("examId");
-        if (examId != null) {
-            MessageDialog.showDialog("违纪记录功能开发中，考试ID: " + examId);
+        if (examId == null) return;
+
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("violation-dialog.fxml"));
+        Scene scene = null;
+        try {
+            scene = new Scene(fxmlLoader.load(), 420, 360);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
         }
+        javafx.stage.Stage dialogStage = new javafx.stage.Stage();
+        dialogStage.initOwner(MainApplication.getMainStage());
+        dialogStage.setScene(scene);
+        dialogStage.setTitle("违纪记录 - " + data.get("courseName"));
+        ViolationEditController controller = fxmlLoader.getController();
+        controller.setParentController(this);
+        String examInfo = data.get("courseName") + " (" + data.get("examDate") + " " + data.get("examTime") + ")";
+        controller.initDialog(examId, examInfo);
+        dialogStage.showAndWait();
     }
 
     @FXML

@@ -28,11 +28,15 @@ public interface MenuInfoRepository extends JpaRepository<MenuInfo,Integer> {
 
     @Modifying
     @Transactional
-    @Query(value="INSERT INTO menu (id, name, title, pid, user_type_ids) VALUES (6, NULL, '教师管理', NULL, '1,3')", nativeQuery = true)
+    @Query(value="INSERT INTO menu (id, name, title, pid, user_type_ids) VALUES (6, NULL, '教师管理', NULL, '3')", nativeQuery = true)
     void insertMenu6();
 
     @Modifying
     @Transactional
     @Query(value="INSERT INTO menu (id, name, title, pid, user_type_ids) VALUES (15, 'logout', '退出', 1, '1,2,3')", nativeQuery = true)
     void insertLogoutMenu();
+
+    List<MenuInfo> findByName(String name);
+
+    List<MenuInfo> findByPid(Integer pid);
 }

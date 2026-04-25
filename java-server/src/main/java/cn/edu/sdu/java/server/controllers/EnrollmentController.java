@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -37,9 +39,12 @@ public class EnrollmentController {
      * 获取当前学生的选课列表
      */
     @PostMapping("/my")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public DataResponse getMyEnrollments(@RequestBody DataRequest request) {
         Integer studentId = request.getInteger("studentId");
-        if (studentId == null) {
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
             studentId = CommonMethod.getPersonId();
         }
 
@@ -66,15 +71,22 @@ public class EnrollmentController {
      * 保存选课（新增或更新）
      */
     @PostMapping("/save")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public DataResponse saveEnrollment(@RequestBody DataRequest request) {
         Integer enrollmentId = request.getInteger("enrollmentId");
         Integer studentId = request.getInteger("studentId");
         Integer courseId = request.getInteger("courseId");
         String semester = request.getString("semester");
-        Double score = request.getDouble("score");
 
         if (studentId == null || courseId == null) {
             return CommonMethod.getReturnMessageError("学生ID和课程ID不能为空");
+        }
+
+        // STUDENT角色只能为自己选课
+        boolean isAdminSave = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdminSave) {
+            studentId = CommonMethod.getPersonId();
         }
 
         Enrollment enrollment = null;
@@ -107,7 +119,6 @@ public class EnrollmentController {
         enrollment.setCourse(courseOpt.get());
 
         if (semester != null) enrollment.setSemester(semester);
-        if (score != null) enrollment.setScore(score);
         if (enrollment.getStatus() == null) enrollment.setStatus("选课中");
 
         enrollmentRepository.save(enrollment);
@@ -118,6 +129,7 @@ public class EnrollmentController {
      * 删除选课
      */
     @PostMapping("/delete")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public DataResponse deleteEnrollment(@RequestBody DataRequest request) {
         Integer enrollmentId = request.getInteger("enrollmentId");
         if (enrollmentId == null || enrollmentId <= 0) {
@@ -129,12 +141,24 @@ public class EnrollmentController {
             return CommonMethod.getReturnMessageError("选课记录不存在");
         }
 
+        // STUDENT角色只能删除自己的选课
+        boolean isAdminDel = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdminDel) {
+            Enrollment enr = op.get();
+            Integer ownerId = enr.getStudent() != null ? enr.getStudent().getPersonId() : null;
+            if (!Integer.valueOf(CommonMethod.getPersonId()).equals(ownerId)) {
+                return CommonMethod.getReturnMessageError("无权删除他人的选课记录");
+            }
+        }
+
         CommonMethod.logDeleteOperation("enrollment", enrollmentId);
         enrollmentRepository.delete(op.get());
         return CommonMethod.getReturnMessageOK();
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> getEnrollments(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "100") int size,
@@ -171,6 +195,7 @@ public class EnrollmentController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> getEnrollment(@PathVariable Integer id) {
         Optional<Enrollment> op = enrollmentRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
@@ -201,6 +226,7 @@ public class EnrollmentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> createEnrollment(@RequestBody Map<String, Object> data) {
         Integer studentId = null;
         Integer courseId = null;
@@ -235,7 +261,6 @@ public class EnrollmentController {
         if (courseId != null) {
             courseRepository.findById(courseId).ifPresent(enrollment::setCourse);
         }
-        if (data.get("score") != null) enrollment.setScore(((Number) data.get("score")).doubleValue());
         if (semester != null) enrollment.setSemester(semester);
         if (data.get("status") != null) enrollment.setStatus((String) data.get("status"));
 
@@ -247,7 +272,6 @@ public class EnrollmentController {
         enrollmentData.put("id", enrollment.getEnrollmentId());
         enrollmentData.put("studentId", enrollment.getStudent() != null ? enrollment.getStudent().getPersonId() : null);
         enrollmentData.put("courseId", enrollment.getCourse() != null ? enrollment.getCourse().getCourseId() : null);
-        enrollmentData.put("score", enrollment.getScore());
         enrollmentData.put("semester", enrollment.getSemester());
         enrollmentData.put("status", enrollment.getStatus());
         result.put("data", enrollmentData);
@@ -255,6 +279,7 @@ public class EnrollmentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> updateEnrollment(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         Optional<Enrollment> op = enrollmentRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
@@ -269,7 +294,6 @@ public class EnrollmentController {
                 Integer courseId = ((Number) data.get("courseId")).intValue();
                 courseRepository.findById(courseId).ifPresent(enrollment::setCourse);
             }
-            if (data.get("score") != null) enrollment.setScore(((Number) data.get("score")).doubleValue());
             if (data.get("semester") != null) enrollment.setSemester((String) data.get("semester"));
             if (data.get("status") != null) enrollment.setStatus((String) data.get("status"));
 
@@ -279,7 +303,6 @@ public class EnrollmentController {
             enrollmentData.put("id", enrollment.getEnrollmentId());
             enrollmentData.put("studentId", enrollment.getStudent() != null ? enrollment.getStudent().getPersonId() : null);
             enrollmentData.put("courseId", enrollment.getCourse() != null ? enrollment.getCourse().getCourseId() : null);
-            enrollmentData.put("score", enrollment.getScore());
             enrollmentData.put("semester", enrollment.getSemester());
             enrollmentData.put("status", enrollment.getStatus());
             result.put("data", enrollmentData);
@@ -291,6 +314,7 @@ public class EnrollmentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> deleteEnrollment(@PathVariable Integer id) {
         Optional<Enrollment> op = enrollmentRepository.findById(id);
         Map<String, Object> result = new HashMap<>();

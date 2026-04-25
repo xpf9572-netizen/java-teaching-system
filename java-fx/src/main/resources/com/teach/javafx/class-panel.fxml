@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.teach.javafx.controller.ClassPanelController"
       prefHeight="600.0" prefWidth="900.0"
       stylesheets="@css/styles.css">
     <padding>
@@ -35,7 +35,6 @@
                         <TableColumn fx:id="counselorColumn" text="辅导员" prefWidth="80"/>
                         <TableColumn fx:id="phoneColumn" text="联系电话" prefWidth="100"/>
                         <TableColumn fx:id="studentCountColumn" text="学生人数" prefWidth="80"/>
-                        <TableColumn fx:id="gradeColumn" text="年级" prefWidth="80"/>
                     </columns>
                 </TableView>
             </children>

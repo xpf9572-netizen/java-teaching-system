@@ -35,6 +35,12 @@ public class WelcomeTeacherController {
     @FXML
     private Label totalStudentsLabel;
 
+    @FXML
+    private Label totalAvgScoreLabel;
+
+    @FXML
+    private Label totalPassRateLabel;
+
     private Map<String, Object> teacherInfo;
     private List<Map<String, Object>> courseList;
 
@@ -83,8 +89,27 @@ public class WelcomeTeacherController {
                 List<Map<String, Object>> courseList = (List<Map<String, Object>>) res.getData();
                 if (courseList != null) {
                     totalCoursesLabel.setText(courseList.size() + " 门课程");
-                    // 统计选课学生数（这里简化处理）
-                    totalStudentsLabel.setText("-- 人");
+                    int totalStudentCount = 0;
+                    for (Map<String, Object> course : courseList) {
+                        Object count = course.get("studentCount");
+                        if (count instanceof Number) {
+                            totalStudentCount += ((Number) count).intValue();
+                        }
+                    }
+                    totalStudentsLabel.setText(totalStudentCount + " 人");
+                }
+            }
+
+            // 加载总体成绩统计
+            DataResponse statsRes = HttpRequestUtil.request("/api/scoreAnalysis/getOverallStatistics", new DataRequest());
+            if (statsRes != null && statsRes.getCode() == 0) {
+                Map<String, Object> data = (Map<String, Object>) statsRes.getData();
+                if (data != null) {
+                    Object avgScore = data.get("avgScore");
+                    totalAvgScoreLabel.setText(avgScore != null ? avgScore.toString() : "--");
+
+                    Object passRate = data.get("passRate");
+                    totalPassRateLabel.setText(passRate != null ? passRate.toString() + "%" : "--");
                 }
             }
         } catch (Exception e) {

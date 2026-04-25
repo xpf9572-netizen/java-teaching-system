@@ -197,20 +197,7 @@ public class EnrollmentController extends ToolController {
             Map<String, Object> data = new HashMap<>();
             data.put("studentId", Long.parseLong(studentComboBox.getValue().getValue()));
             data.put("courseId", Long.parseLong(courseComboBox.getValue().getValue()));
-            if (!scoreField.getText().isEmpty()) {
-                try {
-                    double score = Double.parseDouble(scoreField.getText());
-                    if (score < 0 || score > 100) {
-                        MessageDialog.showDialog("成绩必须在0-100之间");
-                        return;
-                    }
-                    data.put("score", score);
-                } catch (NumberFormatException e) {
-                    MessageDialog.showDialog("请输入有效的数字");
-                    return;
-                }
-            }
-            if (semesterComboBox.getValue() != null) {
+                if (semesterComboBox.getValue() != null) {
                 data.put("semester", semesterComboBox.getValue().getValue());
             }
             if (statusComboBox.getValue() != null) {
@@ -261,7 +248,7 @@ public class EnrollmentController extends ToolController {
         // 填充表单数据
         Long studentId = getLong(form, "studentId");
         Long courseId = getLong(form, "courseId");
-        Double score = (Double) form.get("score");
+        Double score = null;
         String semester = (String) form.get("semester");
         String status = (String) form.get("status");
 
@@ -325,7 +312,6 @@ public class EnrollmentController extends ToolController {
         map.put("courseId", e.getCourseId());
         map.put("studentName", e.getStudentName());
         map.put("courseName", e.getCourseName());
-        map.put("score", e.getScore());
         map.put("semester", e.getSemester());
         map.put("status", e.getStatus());
         return map;

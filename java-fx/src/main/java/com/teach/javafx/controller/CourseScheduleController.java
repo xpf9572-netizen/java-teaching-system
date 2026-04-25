@@ -128,31 +128,25 @@ public class CourseScheduleController {
         }
     }
 
+
     @FXML
     private void onAddButtonClick() {
+        System.out.println("添加按钮被点击了");  // 加这一行
         showEditDialog(null);
     }
 
-    private void showEditDialog(Map<String, Object> data) {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("courseSchedule-edit-dialog.fxml"));
-        Scene scene = null;
+    private void showEditDialog(Object data) {
         try {
-            scene = new Scene(fxmlLoader.load(), 500, 400);
-        } catch (IOException e) {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/teach/javafx/courseSchedule-edit-dialog.fxml"));
+            javafx.scene.layout.GridPane gridPane = loader.load();  // 改成 GridPane
+            javafx.scene.control.Dialog<javafx.scene.control.ButtonType> dialog = new javafx.scene.control.Dialog<>();
+            dialog.getDialogPane().setContent(gridPane);  // 把 GridPane 放进去
+            dialog.setTitle("添加课程安排");
+            dialog.showAndWait();
+        } catch (Exception e) {
             e.printStackTrace();
-            return;
+            new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR, "打开窗口失败：" + e.getMessage()).showAndWait();
         }
-        dialogStage = new javafx.stage.Stage();
-        dialogStage.initOwner(MainApplication.getMainStage());
-        dialogStage.initModality(javafx.stage.Modality.NONE);
-        dialogStage.setScene(scene);
-        dialogStage.setTitle(data == null ? "添加课程安排" : "修改课程安排");
-        dialogStage.setOnCloseRequest(event -> {
-        });
-        CourseScheduleEditController controller = fxmlLoader.getController();
-        controller.setParentController(this);
-        controller.initDialog(data);
-        dialogStage.showAndWait();
     }
 
     public void doClose(String cmd, Map<String, Object> resultData) {

@@ -231,7 +231,6 @@ public class StudentService {
             m.put("courseName", c.getName());
             m.put("credit", c.getCredit());
             m.put("mark", s.getMark());
-            m.put("ranking", s.getRanking());
             list.add(m);
         }
         return list;

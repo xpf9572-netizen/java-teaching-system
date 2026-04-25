@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -27,6 +28,7 @@ public class ClassEntityController {
     private CourseScheduleRepository courseScheduleRepository;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public Map<String, Object> getClasses(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "100") int size,
@@ -62,6 +64,7 @@ public class ClassEntityController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public Map<String, Object> getClass(@PathVariable Integer id) {
         Optional<ClassEntity> op = classEntityRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
@@ -90,6 +93,7 @@ public class ClassEntityController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> createClass(@RequestBody Map<String, Object> data) {
         ClassEntity c = new ClassEntity();
         updateClassFromData(c, data);
@@ -103,6 +107,7 @@ public class ClassEntityController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> updateClass(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         Optional<ClassEntity> op = classEntityRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
@@ -132,6 +137,7 @@ public class ClassEntityController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> deleteClass(@PathVariable Integer id) {
         Optional<ClassEntity> op = classEntityRepository.findById(id);
         Map<String, Object> result = new HashMap<>();

@@ -186,7 +186,11 @@ public class TeacherScoreController {
                 try {
                     DataRequest req = new DataRequest();
                     req.add("courseId", Integer.parseInt(selectedCourse.getValue()));
-                    req.add("personId", ((Number) row.get("personId")).intValue());
+                    req.add("personId", Integer.parseInt(row.get("personId").toString()));
+                    Object scoreIdObj = row.get("scoreId");
+                    if (scoreIdObj != null) {
+                        req.add("scoreId", Integer.parseInt(scoreIdObj.toString()));
+                    }
                     req.add("mark", Integer.parseInt((String) row.get("mark")));
 
                     DataResponse res = HttpRequestUtil.request("/api/score/scoreSave", req);

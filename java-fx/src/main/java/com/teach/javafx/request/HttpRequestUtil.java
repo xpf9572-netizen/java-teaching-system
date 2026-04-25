@@ -2,16 +2,19 @@ package com.teach.javafx.request;
 
 import com.teach.javafx.AppStore;
 import com.google.gson.Gson;
-
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.URI;
 import java.net.http.HttpResponse;
+import java.io.IOException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * HttpRequestUtil 后台请求实例程序，主要实践向后台发送请求的方法
@@ -22,6 +25,25 @@ public class HttpRequestUtil {
     private static final Gson gson = new Gson();
     private static final HttpClient client = HttpClient.newHttpClient();
     public static String serverUrl = "http://localhost:22222";
+    private static Runnable onAuthFailure;
+    private static final AtomicBoolean authFailureHandled = new AtomicBoolean(false);
+
+    public static void setOnAuthFailure(Runnable callback) {
+        onAuthFailure = callback;
+    }
+
+    public static void resetAuthFailureFlag() {
+        authFailureHandled.set(false);
+    }
+
+    private static void handleAuthFailure() {
+        if (authFailureHandled.compareAndSet(false, true)) {
+            AppStore.setJwt(null);
+            if (onAuthFailure != null) {
+                onAuthFailure.run();
+            }
+        }
+    }
 //    public static String serverUrl = "http://202.194.7.29:22222";
 
     /**
@@ -82,8 +104,10 @@ public class HttpRequestUtil {
                 HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
                 System.out.println("url=" + url +"    response.statusCode="+response.statusCode());
                 if (response.statusCode() == 200) {
-                    //                System.out.println(response.body());
                     return gson.fromJson(response.body(), DataResponse.class);
+                }
+                if (response.statusCode() == 401 || response.statusCode() == 403) {
+                    handleAuthFailure();
                 }
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -98,17 +122,25 @@ public class HttpRequestUtil {
      * @return MyTreeNode 返回后台返回数据
      */
     public static MyTreeNode requestTreeNode(String url, DataRequest request){
+        JwtResponse jwt = AppStore.getJwt();
+        if(jwt == null || jwt.getToken() == null) {
+            System.out.println("用户未登录或登录已过期");
+            return null;
+        }
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + url))
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(request)))
                 .headers("Content-Type", "application/json")
-                .headers("Authorization", "Bearer "+AppStore.getJwt().getToken())
+                .headers("Authorization", "Bearer " + jwt.getToken())
                 .build();
         HttpClient client = HttpClient.newHttpClient();
         try {
             HttpResponse<String>  response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             if(response.statusCode() == 200) {
                 return gson.fromJson(response.body(), MyTreeNode.class);
+            }
+            if (response.statusCode() == 401 || response.statusCode() == 403) {
+                handleAuthFailure();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -117,11 +149,16 @@ public class HttpRequestUtil {
     }
 
     public static List<MyTreeNode> requestTreeNodeList(String url, DataRequest request){
+        JwtResponse jwt = AppStore.getJwt();
+        if(jwt == null || jwt.getToken() == null) {
+            System.out.println("用户未登录或登录已过期");
+            return null;
+        }
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + url))
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(request)))
                 .headers("Content-Type", "application/json")
-                .headers("Authorization", "Bearer "+AppStore.getJwt().getToken())
+                .headers("Authorization", "Bearer " + jwt.getToken())
                 .build();
         HttpClient client = HttpClient.newHttpClient();
         try {
@@ -133,6 +170,9 @@ public class HttpRequestUtil {
                     rList.add(new MyTreeNode(stringObjectMap));
                 }
                 return rList;
+            }
+            if (response.statusCode() == 401 || response.statusCode() == 403) {
+                handleAuthFailure();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -147,11 +187,16 @@ public class HttpRequestUtil {
      * @return List<OptionItem> 返回后台返回数据
      */
     public static List<OptionItem> requestOptionItemList(String url, DataRequest request){
+        JwtResponse jwt = AppStore.getJwt();
+        if(jwt == null || jwt.getToken() == null) {
+            System.out.println("用户未登录或登录已过期");
+            return null;
+        }
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + url))
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(request)))
                 .headers("Content-Type", "application/json")
-                .headers("Authorization", "Bearer "+AppStore.getJwt().getToken())
+                .headers("Authorization", "Bearer " + jwt.getToken())
                 .build();
         HttpClient client = HttpClient.newHttpClient();
         try {
@@ -159,6 +204,9 @@ public class HttpRequestUtil {
             if(response.statusCode() == 200) {
                 OptionItemList o = gson.fromJson(response.body(), OptionItemList.class);
                 return o.getItemList();
+            }
+            if (response.statusCode() == 401 || response.statusCode() == 403) {
+                handleAuthFailure();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -185,17 +233,25 @@ public class HttpRequestUtil {
      * @return List<OptionItem> 返回后台返回数据
      */
     public static byte[] requestByteData(String url, DataRequest request){
+        JwtResponse jwt = AppStore.getJwt();
+        if(jwt == null || jwt.getToken() == null) {
+            System.out.println("用户未登录或登录已过期");
+            return null;
+        }
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + url))
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(request)))
                 .headers("Content-Type", "application/json")
-                .headers("Authorization", "Bearer "+AppStore.getJwt().getToken())
+                .headers("Authorization", "Bearer " + jwt.getToken())
                 .build();
         HttpClient client = HttpClient.newHttpClient();
         try {
             HttpResponse<byte[]>  response = client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
             if(response.statusCode() == 200) {
                 return response.body();
+            }
+            if (response.statusCode() == 401 || response.statusCode() == 403) {
+                handleAuthFailure();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -222,6 +278,9 @@ public class HttpRequestUtil {
             HttpResponse<String>  response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if(response.statusCode() == 200) {
                 return gson.fromJson(response.body(), DataResponse.class);
+            }
+            if (response.statusCode() == 401 || response.statusCode() == 403) {
+                handleAuthFailure();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -252,6 +311,9 @@ public class HttpRequestUtil {
             if(response.statusCode() == 200) {
                 return gson.fromJson(response.body(), DataResponse.class);
             }
+            if (response.statusCode() == 401 || response.statusCode() == 403) {
+                handleAuthFailure();
+            }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -275,6 +337,8 @@ public class HttpRequestUtil {
             if (response.statusCode() == 200) {
                 java.nio.file.Files.write(Path.of(fileName), response.body());
                 System.out.println("File downloaded: " + fileName);
+            } else if (response.statusCode() == 401 || response.statusCode() == 403) {
+                handleAuthFailure();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -300,10 +364,69 @@ public class HttpRequestUtil {
             if (response.statusCode() == 200) {
                 java.nio.file.Files.write(Path.of(fileName), response.body());
                 System.out.println("File downloaded: " + fileName);
+            } else if (response.statusCode() == 401 || response.statusCode() == 403) {
+                handleAuthFailure();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
+    public static DataResponse get(String url) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:22222" + url))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(response.body(), DataResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            DataResponse error = new DataResponse();
+            error.setCode(1);
+            error.setMsg(e.getMessage());
+            return error;
+        }
+    }
 
+    public static Map<String, Object> getForMap(String url) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:22222" + url))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("msg", e.getMessage());
+            return error;
+        }
+    }
+
+    public static Map<String, Object> postForMap(String url, Object body) {
+        try {
+            String json = new ObjectMapper().writeValueAsString(body);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:22222" + url))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("msg", e.getMessage());
+            return error;
+        }
+    }
 }

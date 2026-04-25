@@ -64,4 +64,15 @@ public class CourseScheduleController {
     public DataResponse getScheduleOptionList(@Valid @RequestBody DataRequest dataRequest) {
         return scheduleService.getScheduleOptionList(dataRequest);
     }
+    @GetMapping("/courseList")
+    public DataResponse getCourseList() {
+        System.out.println("=== Controller: getCourseList 被调用了 ===");
+        return scheduleService.getCourseList();
+    }
+
+    @GetMapping("/teacherList")
+    public DataResponse getTeacherList() {
+        System.out.println("=== Controller: getTeacherList 被调用了 ===");
+        return scheduleService.getTeacherList();
+    }
 }

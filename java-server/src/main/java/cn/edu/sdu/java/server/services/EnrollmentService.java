@@ -59,7 +59,6 @@ public class EnrollmentService {
         Integer enrollmentId = dataRequest.getInteger("enrollmentId");
         Long studentId = dataRequest.getLong("studentId");
         Long courseId = dataRequest.getLong("courseId");
-        Double score = dataRequest.getDouble("score");
         String semester = dataRequest.getString("semester");
         String status = dataRequest.getString("status");
 
@@ -87,7 +86,6 @@ public class EnrollmentService {
             courseOp.ifPresent(enrollment::setCourse);
         }
 
-        enrollment.setScore(score);
         enrollment.setSemester(semester);
         enrollment.setStatus(status);
         enrollmentRepository.save(enrollment);

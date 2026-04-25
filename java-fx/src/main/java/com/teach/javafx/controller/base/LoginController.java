@@ -56,6 +56,8 @@ public class LoginController {
             MessageDialog.showDialog( msg);
             return;
         }
+        // 重置认证失败标志，允许后续新的401/403触发重新登录
+        HttpRequestUtil.resetAuthFailureFlag();
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("base/main-frame.fxml"));
         try {
             Scene scene = new Scene(fxmlLoader.load(), -1, -1);

@@ -5,6 +5,11 @@ security:
     expiration-time: 86400000
 server:
   port: 22222
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 spring:
   application:
     name: java-server
@@ -25,11 +30,6 @@ spring:
       max-request-size: 200MB
   jmx:
     enabled:false
-  http:
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
 attach:
   folder: /teach-2025/
 logging:

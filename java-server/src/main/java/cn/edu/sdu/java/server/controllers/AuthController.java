@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -44,6 +45,7 @@ public class AuthController {
         return authService.testValidateInfo(dataRequest);
     }
     @PostMapping("/registerUser")
+    @PreAuthorize("hasRole('ADMIN')")
     public DataResponse registerUser(@Valid @RequestBody DataRequest dataRequest) {
         return authService.registerUser(dataRequest);
     }

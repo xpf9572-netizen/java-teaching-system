@@ -34,4 +34,6 @@ public interface StudentRepository extends JpaRepository<Student,Integer> {
     List<Student> findStudentsByCourseIdAndSemester(Integer courseId, String semester);
 
     long countByClassName(String className);
+
+    List<Student> findByClassName(String className);
 }

@@ -15,6 +15,4 @@ import java.util.List;
 public interface NoticeRepository extends JpaRepository<Notice, Integer> {
     @Query("from Notice where ?1 = '' or targetAudience = ?1 or targetAudience = 'ALL' order by publishTime desc")
     List<Notice> findNoticeListByAudience(String audience);
-
-    List<Notice> findByType(String type);
 }

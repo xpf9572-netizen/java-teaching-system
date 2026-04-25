@@ -17,19 +17,13 @@ public class NoticeController {
         this.noticeService = noticeService;
     }
 
-    @GetMapping("/list")
-    public DataResponse getNoticeList(@RequestParam(required = false) String audience) {
-        DataRequest dataRequest = new DataRequest();
-        if (audience != null) {
-            dataRequest.add("audience", audience);
-        }
+    @PostMapping("/list")
+    public DataResponse getNoticeList(@Valid @RequestBody DataRequest dataRequest) {
         return noticeService.getNoticeList(dataRequest);
     }
 
-    @GetMapping("/{id}")
-    public DataResponse getNoticeById(@PathVariable Integer id) {
-        DataRequest dataRequest = new DataRequest();
-        dataRequest.add("noticeId", id);
+    @PostMapping("/getById")
+    public DataResponse getNoticeById(@Valid @RequestBody DataRequest dataRequest) {
         return noticeService.getNoticeById(dataRequest);
     }
 

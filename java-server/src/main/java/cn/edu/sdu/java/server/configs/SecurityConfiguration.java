@@ -11,8 +11,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
@@ -37,14 +35,12 @@ public class SecurityConfiguration {
         http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
             configuration.setAllowedOrigins(List.of("http://localhost:8005"));
-            configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
             configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
             configuration.setAllowCredentials(true);
-            configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
             return configuration;
         }));
-        http
-                .authorizeHttpRequests(
+        http.authorizeHttpRequests(
                         authz -> {
                             try {
                                 authz
@@ -53,7 +49,9 @@ public class SecurityConfiguration {
                                         .requestMatchers("/auth/**")
                                         .permitAll()
                                         .requestMatchers("/api/admin/**")
-                                        .permitAll()
+                                        .authenticated()
+                                        .requestMatchers("/api/courseSchedule/teacherList").permitAll()
+                                        .requestMatchers("/api/courseSchedule/courseList").permitAll()
                                         .requestMatchers("/api/**")
                                         .authenticated()
                                         .anyRequest().permitAll();
@@ -68,22 +66,5 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(List.of("http://localhost:8005"));
-        configuration.setAllowedMethods(List.of("GET","POST","OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**",configuration);
-
-        return source;
-    }
-
 
 }
