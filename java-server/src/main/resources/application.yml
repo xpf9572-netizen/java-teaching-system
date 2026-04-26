@@ -1,0 +1,39 @@
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY:mySecretKeyForJwtTokenGenerationThatIsLongEnough123456}
+    expiration-time: 86400000
+server:
+  port: 22222
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+spring:
+  application:
+    name: java-server
+  datasource:
+    url: jdbc:mysql://202.194.14.120:3306/java_1_09?allowPublicKeyRetrieval=true&useSSL=false
+    username: java_1_09
+    password: JavaP109@
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 2
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+  jmx:
+    enabled:false
+attach:
+  folder: /teach-2025/
+logging:
+  config: classpath:loggback.xml
+  level:
+    root: INFO
+    org.springframework.security: DEBUG

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.teach.javafx.controller.WelcomeTeacherController"
+            stylesheets="@css/styles.css">
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <VBox spacing="20" alignment="TOP_CENTER" prefWidth="800">
+                <padding>
+                    <Insets top="30" right="30" bottom="30" left="30"/>
+                </padding>
+
+                <!-- 欢迎标题 -->
+                <Label text="教师管理系统">
+                    <font>
+                        <Font size="28" fx:id="welcomeFont"/>
+                    </font>
+                </Label>
+
+                <!-- 教师信息卡片 -->
+                <GridPane hgap="20" vgap="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 10, 0, 0);">
+                    <columnConstraints>
+                        <ColumnConstraints halignment="RIGHT" prefWidth="100"/>
+                        <ColumnConstraints halignment="LEFT" prefWidth="200"/>
+                        <ColumnConstraints halignment="RIGHT" prefWidth="100"/>
+                        <ColumnConstraints halignment="LEFT" prefWidth="200"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints/>
+                        <RowConstraints/>
+                    </rowConstraints>
+
+                    <Label text="姓名：" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="teacherNameLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="工号：" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="teacherNumLabel" text="--" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+                    <Label text="学院：" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="deptLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="职称：" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="titleLabel" text="--" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                </GridPane>
+
+                <!-- 统计卡片 -->
+                <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 10, 0, 0);">
+                    <VBox alignment="CENTER" prefWidth="150">
+                        <Label text="教授课程" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                        <Label fx:id="totalCoursesLabel" text="--" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #2196F3;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" prefWidth="150">
+                        <Label text="学生总数" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                        <Label fx:id="totalStudentsLabel" text="--" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" prefWidth="150">
+                        <Label text="平均成绩" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                        <Label fx:id="totalAvgScoreLabel" text="--" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #FF9800;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" prefWidth="150">
+                        <Label text="及格率" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                        <Label fx:id="totalPassRateLabel" text="--" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- 快捷操作 -->
+                <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 10, 0, 0);">
+                    <Label text="快捷操作" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                    <HBox spacing="15">
+                        <Button text="我的课程" onAction="#onMyCourseClick" prefWidth="120"/>
+                        <Button text="成绩录入" onAction="#onScoreEntryClick" prefWidth="120"/>
+                        <Button text="考勤管理" onAction="#onAttendanceManageClick" prefWidth="120"/>
+                    </HBox>
+                </VBox>
+
+                <!-- 操作按钮 -->
+                <HBox spacing="15" alignment="CENTER">
+                    <Button text="刷新" onAction="#onRefreshButtonClick" style="-fx-pref-width: 100;"/>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

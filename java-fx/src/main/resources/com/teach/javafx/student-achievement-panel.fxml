@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.teach.javafx.controller.StudentAchievementController">
+    <top>
+        <VBox spacing="10">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="成就类型:"/>
+                <ComboBox fx:id="typeComboBox" prefWidth="120"/>
+                <Button text="查询" onAction="#onQueryButtonClick"/>
+                <Button text="新增" onAction="#onAddButtonClick"/>
+                <Button text="删除" onAction="#onDeleteButtonClick"/>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <TableView fx:id="dataTableView">
+            <columns>
+                <TableColumn fx:id="typeColumn" text="类型" prefWidth="100"/>
+                <TableColumn fx:id="nameColumn" text="成果名称" prefWidth="200"/>
+                <TableColumn fx:id="levelColumn" text="级别" prefWidth="80"/>
+                <TableColumn fx:id="awardDateColumn" text="日期" prefWidth="100"/>
+                <TableColumn fx:id="statusColumn" text="状态" prefWidth="80"/>
+                <TableColumn fx:id="descriptionColumn" text="描述" prefWidth="300"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

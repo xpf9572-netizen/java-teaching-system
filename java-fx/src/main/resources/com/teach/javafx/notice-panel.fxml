@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            style="-fx-background-image: url('shanda1.jpg'); -fx-background-repeat: no-repeat; -fx-background-size: cover;" fx:controller="com.teach.javafx.controller.NoticeController">
+   <top>
+      <HBox spacing="10.0" alignment="CENTER_LEFT">
+         <padding><Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/></padding>
+         <Label text="通知公告" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+         <Button text="刷新" onAction="#onRefreshButtonClick"/>
+         <Button text="添加" onAction="#onAddButtonClick"/>
+         <Button text="修改" onAction="#onEditButtonClick"/>
+         <Button text="删除" onAction="#onDeleteButtonClick"/>
+      </HBox>
+   </top>
+   <center>
+      <TableView fx:id="dataTableView" onMouseClicked="#onTableRowClick">
+         <columns>
+            <TableColumn fx:id="titleColumn" prefWidth="200.0" text="标题" />
+            <TableColumn fx:id="publisherColumn" prefWidth="100.0" text="发布人" />
+            <TableColumn fx:id="publishTimeColumn" prefWidth="150.0" text="发布时间" />
+            <TableColumn fx:id="typeColumn" prefWidth="100.0" text="类型" />
+         </columns>
+      </TableView>
+   </center>
+</BorderPane>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      prefHeight="600.0" prefWidth="900.0" stylesheets="@css/styles.css">
+    <padding><Insets bottom="10" left="10" right="10" top="10"/></padding>
+    <children>
+        <HBox spacing="10">
+            <Label text="学生姓名:"/><TextField fx:id="queryStudentNameField" prefWidth="120"/>
+            <Button text="查询" onAction="#onQueryButtonClick"/>
+            <Button text="新建" onAction="#onAddButtonClick"/>
+            <Button text="删除" onAction="#onDeleteButtonClick"/>
+        </HBox>
+        <TableView fx:id="dataTableView" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="studentNameColumn" text="学生姓名" prefWidth="100"/>
+                <TableColumn fx:id="courseNameColumn" text="课程名称" prefWidth="150"/>
+                <TableColumn fx:id="attendanceDateColumn" text="考勤日期" prefWidth="120"/>
+                <TableColumn fx:id="statusColumn" text="状态" prefWidth="80"/>
+                <TableColumn fx:id="remarkColumn" text="备注" prefWidth="150"/>
+            </columns>
+        </TableView>
+        <VBox styleClass="bordered-container" spacing="10">
+            <padding><Insets bottom="10" left="10" right="10" top="10"/></padding>
+            <Label text="考勤信息编辑" styleClass="section-title"/>
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="80"/><ColumnConstraints minWidth="180"/>
+                    <ColumnConstraints minWidth="80"/><ColumnConstraints minWidth="150"/>
+                </columnConstraints>
+                <Label text="学生:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <ComboBox fx:id="studentComboBox" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="课程:" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                <ComboBox fx:id="courseComboBox" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                <Label text="考勤日期:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <DatePicker fx:id="attendanceDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="状态:" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                <ComboBox fx:id="statusComboBox" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                <Label text="备注:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <TextField fx:id="remarkField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            </GridPane>
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="保存" onAction="#onSaveButtonClick"/>
+            </HBox>
+        </VBox>
+    </children>
+</VBox>
