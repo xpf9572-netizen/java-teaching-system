@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<VBox spacing="15" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.teach.javafx.controller.StudentLeaveAddDialogController"
+      prefWidth="450" prefHeight="320">
+    <padding><Insets bottom="15" left="20" right="20" top="15"/></padding>
+
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="90"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints/>
+            <RowConstraints/>
+            <RowConstraints/>
+        </rowConstraints>
+
+        <Label text="指导老师:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <ComboBox fx:id="teacherComboBox" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="300"/>
+
+        <Label text="请假日期:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="leaveDateField" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="300"/>
+
+        <Label text="请假原因:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextArea fx:id="reasonArea" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="300" prefHeight="100"/>
+    </GridPane>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="确定" onAction="#onOkButtonClick" prefWidth="80"/>
+        <Button text="取消" onAction="#onCancelButtonClick" prefWidth="80"/>
+    </HBox>
+</VBox>

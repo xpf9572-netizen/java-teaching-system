@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.teach.javafx.controller.ScoreAnalysisController"
+      prefHeight="600.0" prefWidth="1000.0"
+      stylesheets="@../css/styles.css">
+    <children>
+        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="tool-bar">
+            <padding>
+                <Insets bottom="10" left="10" right="10" top="10"/>
+            </padding>
+            <children>
+                <Label text="分析类型:"/>
+                <ComboBox fx:id="analysisTypeComboBox" prefWidth="120"/>
+                <Label text="课程:"/>
+                <ComboBox fx:id="courseComboBox" prefWidth="200"/>
+                <Button text="查询" onAction="#onQueryButtonClick" styleClass="button-style"/>
+            </children>
+        </HBox>
+
+        <HBox spacing="20" VBox.vgrow="ALWAYS">
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label text="分析结果" styleClass="label-header"/>
+                <TableView fx:id="dataTableView" prefHeight="250.0">
+                    <columns>
+                        <TableColumn fx:id="nameColumn" text="指标" prefWidth="150"/>
+                        <TableColumn fx:id="valueColumn" text="数值" prefWidth="150"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label text="分数分布" styleClass="label-header"/>
+                <TableView fx:id="distributionTableView" prefHeight="250.0">
+                    <columns>
+                        <TableColumn fx:id="rangeColumn" text="分数段" prefWidth="100"/>
+                        <TableColumn fx:id="countColumn" text="人数" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="10" VBox.vgrow="ALWAYS">
+            <Label text="预警学生列表" styleClass="label-header"/>
+            <TableView fx:id="warningTableView" prefHeight="200.0">
+                <columns>
+                    <TableColumn fx:id="studentColumn" text="学生" prefWidth="120"/>
+                    <TableColumn fx:id="courseNameColumn" text="课程" prefWidth="150"/>
+                    <TableColumn fx:id="markColumn" text="成绩" prefWidth="80"/>
+                    <TableColumn fx:id="gapColumn" text="差距" prefWidth="80"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </children>
+</VBox>

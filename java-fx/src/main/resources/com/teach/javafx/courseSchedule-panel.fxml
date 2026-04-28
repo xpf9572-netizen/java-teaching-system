@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.teach.javafx.controller.CourseScheduleController"
+      prefHeight="600.0" prefWidth="1000.0"
+      stylesheets="@../css/styles.css"
+      xmlns:custom="*">
+    <children>
+        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="tool-bar">
+            <padding>
+                <Insets bottom="10" left="10" right="10" top="10"/>
+            </padding>
+            <children>
+                <Label text="学期:"/>
+                <ComboBox fx:id="semesterComboBox" prefWidth="120"/>
+                <Button text="查询" onAction="#onQueryButtonClick" styleClass="button-style"/>
+                <Button text="添加课程安排" onAction="#onAddButtonClick" styleClass="button-style"/>
+            </children>
+        </HBox>
+
+        <TableView fx:id="dataTableView" prefHeight="500.0" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="courseColumn" text="课程" prefWidth="120"/>
+                <TableColumn fx:id="teacherColumn" text="教师" prefWidth="80"/>
+                <TableColumn fx:id="classColumn" text="班级" prefWidth="100"/>
+                <TableColumn fx:id="classroomColumn" text="教室" prefWidth="80"/>
+                <TableColumn fx:id="dayOfWeekColumn" text="星期" prefWidth="60"/>
+                <TableColumn fx:id="classPeriodColumn" text="节次" prefWidth="80"/>
+                <TableColumn fx:id="semesterColumn" text="学期" prefWidth="80"/>
+                <TableColumn fx:id="operateColumn" text="操作" prefWidth="150"/>
+            </columns>
+        </TableView>
+    </children>
+</VBox>

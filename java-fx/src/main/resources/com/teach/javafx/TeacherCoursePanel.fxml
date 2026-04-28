@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.teach.javafx.controller.TeacherCourseController">
+
+    <top>
+        <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
+            <padding>
+                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+            </padding>
+            <Label text="我的课程" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label text="课程总数：" style="-fx-font-size: 14px;"/>
+            <Label fx:id="totalCoursesLabel" text="--" style="-fx-font-size: 14px; -fx-text-fill: #2196F3; -fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TableView fx:id="dataTableView">
+            <columns>
+                <TableColumn fx:id="courseNumColumn" prefWidth="100.0" text="课程编号"/>
+                <TableColumn fx:id="courseNameColumn" prefWidth="200.0" text="课程名称"/>
+                <TableColumn fx:id="creditColumn" prefWidth="80.0" text="学分"/>
+                <TableColumn fx:id="studentCountColumn" prefWidth="100.0" text="选课人数"/>
+                <TableColumn fx:id="semesterColumn" prefWidth="100.0" text="学期"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <FlowPane alignment="CENTER" prefHeight="40.0" BorderPane.alignment="CENTER">
+            <Button text="刷新" onAction="#onRefreshButtonClick"/>
+        </FlowPane>
+    </bottom>
+</BorderPane>

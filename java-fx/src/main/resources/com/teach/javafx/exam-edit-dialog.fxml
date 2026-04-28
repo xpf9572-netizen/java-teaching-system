@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          hgap="10" vgap="10">
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20"/>
+    </padding>
+
+    <Label text="课程:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+    <ComboBox fx:id="courseComboBox" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="200"/>
+
+    <Label text="学期:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+    <ComboBox fx:id="semesterComboBox" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="200"/>
+
+    <Label text="考试日期:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+    <TextField fx:id="examDateField" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="200"/>
+
+    <Label text="考试时间:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+    <TextField fx:id="examTimeField" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="200"/>
+
+    <Label text="考试地点:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+    <TextField fx:id="examLocationField" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="200"/>
+
+    <Label text="监考教师:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+    <ComboBox fx:id="invigilatorComboBox" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="200"/>
+
+    <Label text="考试类型:" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+    <ComboBox fx:id="examTypeComboBox" GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="200"/>
+
+    <Label text="报考人数:" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+    <TextField fx:id="totalStudentsField" GridPane.columnIndex="1" GridPane.rowIndex="7" prefWidth="200"/>
+
+    <Label text="备注:" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+    <TextField fx:id="remarkField" GridPane.columnIndex="1" GridPane.rowIndex="8" prefWidth="200"/>
+
+    <HBox spacing="10" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="9" alignment="CENTER">
+        <Button text="保存" onAction="#onSaveButtonClick" styleClass="button-style"/>
+        <Button text="取消" onAction="#onCancelButtonClick" styleClass="button-style"/>
+    </HBox>
+</GridPane>

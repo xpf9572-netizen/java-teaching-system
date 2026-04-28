@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.teach.javafx.controller.ViolationEditController"
+          hgap="10" vgap="10">
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20"/>
+    </padding>
+
+    <Label text="考试信息:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+    <Label fx:id="examInfoLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="250"
+           style="-fx-font-weight: bold;"/>
+
+    <Label text="违纪学生:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+    <ComboBox fx:id="studentComboBox" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="250"/>
+
+    <Label text="违纪类型:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+    <ComboBox fx:id="violationTypeComboBox" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="250"/>
+
+    <Label text="违纪描述:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+    <TextField fx:id="violationDescField" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="250"/>
+
+    <Label text="处罚方式:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+    <TextField fx:id="punishmentField" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="250"/>
+
+    <Label text="备注:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+    <TextField fx:id="remarkField" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="250"/>
+
+    <HBox spacing="10" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="6" alignment="CENTER">
+        <Button text="保存" onAction="#onSaveButtonClick" styleClass="button-style"/>
+        <Button text="取消" onAction="#onCancelButtonClick" styleClass="button-style"/>
+    </HBox>
+</GridPane>
